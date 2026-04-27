@@ -124,13 +124,28 @@ namespace Content.Shared.Cargo.Prototypes
         /// <summary>
         /// What entity to spawn as the container.
         /// </summary>
+        [DataField]
+        public ProtoId<CargoCratePrototype> Crate;
+
+        [DataField]
+        public bool? Required;
+    }
+
+    [Prototype]
+    public sealed partial class CargoCratePrototype : IPrototype
+    {
+        /// <summary>
+        /// What entity to spawn as the container.
+        /// </summary>
+        [ViewVariables]
+        [IdDataField]
+        public string ID { get; private set; } = default!;
+
         [DataField(required: true)]
         public EntProtoId<ContainerManagerComponent> Entity;
-
-        /// <summary>
-        /// What container in <see cref="Entity"/> the product should be inserted into.
-        /// </summary>
         [DataField(required: true)]
-        public string ContainerId;
+        public string ContainerId = string.Empty;
+        [DataField]
+        public int? Cost;
     }
 }

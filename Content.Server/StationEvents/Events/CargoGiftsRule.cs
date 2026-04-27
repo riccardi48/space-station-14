@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Server.Cargo.Components;
 using Content.Server.Cargo.Systems;
+using Content.Shared.Cargo;
 using Content.Server.GameTicking;
 using Content.Server.StationEvents.Components;
 using Content.Shared.GameTicking.Components;
@@ -58,14 +59,13 @@ public sealed class CargoGiftsRule : StationEventSystem<CargoGiftsRuleComponent>
         {
             // I wish there was a nice way to pop this
             var (productId, qty) = component.Gifts.First();
+            CargoOrderBasketData basket = new();
+            basket.Products.Add(new CargoOrderItemData(productId, qty));
             component.Gifts.Remove(productId);
-
-            var product = _prototypeManager.Index(productId);
 
             if (!_cargoSystem.AddAndApproveOrder(
                     station!.Value,
-                    product,
-                    qty,
+                    basket,
                     Loc.GetString(component.Sender),
                     Loc.GetString(component.Description),
                     Loc.GetString(component.Dest),

@@ -10,14 +10,12 @@ public sealed class CargoConsoleAddOrderMessage : BoundUserInterfaceMessage
 {
     public string Requester;
     public string Reason;
-    public string CargoProductId;
-    public int Amount;
+    public CargoOrderBasketData Basket;
 
-    public CargoConsoleAddOrderMessage(string requester, string reason, string cargoProductId, int amount)
+    public CargoConsoleAddOrderMessage(string requester, string reason, CargoOrderBasketData basket)
     {
         Requester = requester;
         Reason = reason;
-        CargoProductId = cargoProductId;
-        Amount = amount;
+        Basket = basket;
     }
 }

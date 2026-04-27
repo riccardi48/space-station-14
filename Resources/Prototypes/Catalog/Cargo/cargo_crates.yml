@@ -1,0 +1,17 @@
+- type: cargoCrate
+  id: SteelCrate
+  entity: CrateGenericSteel
+  containerId: entity_storage
+  cost: 50
+
+- type: cargoCrate
+  id: WrappedParcel
+  entity: WrappedParcel
+  containerId: contents
+  cost: 20
+
+- type: cargoCrate
+  id: PlasmaCrate
+  entity: CratePlasma
+  containerId: entity_storage
+  cost: 100

@@ -30,40 +30,7 @@ namespace Content.Client.Cargo.UI
 
         public void SetOrders(SpriteSystem sprites, IPrototypeManager protoManager, List<CargoOrderData> orders)
         {
-            Orders.RemoveAllChildren();
-
-            foreach (var order in orders)
-            {
-                 if (!protoManager.Resolve(order.Product, out var productProto))
-                     continue;
-
-                 var product = protoManager.Index<EntityPrototype>(productProto.Product);
-                 var productName = product.Name;
-                 var account = protoManager.Index(order.Account);
-
-                 var row = new CargoOrderRow
-                 {
-                     Order = order,
-                     Icon = { Texture = sprites.Frame0(product) },
-                     ProductName =
-                     {
-                         Text = Loc.GetString(
-                             "cargo-console-menu-populate-orders-cargo-order-row-product-name-text",
-                             ("productName", productName),
-                             ("orderAmount", order.OrderQuantity - order.NumDispatched),
-                             ("orderRequester", order.Requester),
-                             ("accountColor", account.Color),
-                             ("account", Loc.GetString(account.Code)))
-                     },
-                     Description = {Text = Loc.GetString("cargo-console-menu-order-reason-description",
-                         ("reason", order.Reason))}
-                 };
-
-                 row.Approve.Visible = false;
-                 row.Cancel.Visible = false;
-
-                 Orders.AddChild(row);
-            }
+            return;
         }
     }
 }

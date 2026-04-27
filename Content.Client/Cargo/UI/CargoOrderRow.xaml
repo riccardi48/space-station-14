@@ -11,56 +11,62 @@
                   Margin="-14 -2">
 
         <BoxContainer Orientation="Vertical">
-            <Control>
-                <PanelContainer StyleClasses="WindowHeadingBackground" />
+            <PanelContainer StyleClasses="WindowHeadingBackground" />
 
-                <BoxContainer Margin="6">
-                    <Label Name="Title"
-                           Access="Public"
-                           MaxHeight="28"
-                           StyleClasses="LabelKeyText"/>
-                </BoxContainer>
-            </Control>
+            <BoxContainer Margin="6">
+                <Label Name="Title"
+                        Access="Public"
+                        MaxHeight="28"
+                        StyleClasses="LabelKeyText"/>
+            </BoxContainer>
 
             <PanelContainer Name="Stride"
-                Access="Public"
-                StyleClasses="LowDivider" />
+                    Access="Public"
+                    StyleClasses="LowDivider" />
         </BoxContainer>
 
         <!-- Info -->
-        <BoxContainer>
-            <TextureRect Name="Icon"
-                         Access="Public"
-                         MinSize="32 32"
-                         Margin="4"
-                         Stretch="KeepAspectCentered"
-                         RectClipContent="True"
-                         VerticalAlignment="Center"/>
-
-            <PanelContainer StyleClasses="LowDivider" Margin="4 0"/>
-
-            <BoxContainer Orientation="Vertical"
-                          HorizontalExpand="True"
-                          VerticalExpand="True">
-
-                <RichTextLabel Name="ProductName"
-                       Access="Public"
-                       HorizontalExpand="True"
-                       VerticalExpand="True"
-                       StyleClasses="LabelSubText" />
-
+        <BoxContainer Name = "Products"
+                    Orientation="Vertical"
+                    HorizontalExpand="True"
+                    VerticalExpand="True"
+                    Access="Public">
+            <!-- Products are added here by code -->
+        </BoxContainer>
+        <BoxContainer Orientation="Vertical"
+                        HorizontalExpand="True"
+                        VerticalAlignment="Bottom">
+            <BoxContainer Orientation="Horizontal"
+                        HorizontalExpand="True">
+                <Control MinWidth="5" />
+                <Label Text ="{Loc 'cargo-console-menu-cart-total-label'}"
+                    Access="Public"
+                    HorizontalAlignment="Left" />
+                <Control HorizontalExpand="True" />
+                <Label Name="BasketTotal"
+                    Text = "0"
+                    Access="Public"
+                    HorizontalAlignment="Right"
+                    Align="Right" />
+                <Control MinWidth="15" />
+            </BoxContainer>
+            <PanelContainer Name="StrideStride"
+                Access="Public"
+                StyleClasses="LowDivider" />
+            <BoxContainer Orientation="Horizontal"
+                        HorizontalExpand="True">
+                <Control MinWidth="5" />
                 <Label Name="Description"
-                       Access="Public"
-                       HorizontalExpand="True"
-                       VerticalExpand="True"
-                       StyleClasses="LabelSubText"
-                       ClipText="True" />
+                        Access="Public"
+                        HorizontalExpand="True"
+                        VerticalExpand="True"
+                        StyleClasses="LabelSubText"
+                        ClipText="True" />
             </BoxContainer>
         </BoxContainer>
 
         <BoxContainer Orientation="Vertical">
             <PanelContainer StyleClasses="LowDivider" />
-
             <!-- Buttons -->
             <!-- Btn's position hardcoded (args.Button.Parent?.Parent?.Parent type) in CargoConsoleBUI 158 & 166 line -->
             <BoxContainer Margin="6">

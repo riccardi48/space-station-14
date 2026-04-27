@@ -17,20 +17,7 @@ namespace Content.Shared.Cargo
         /// The ID of the cargo product ordered.
         /// </summary>
         [DataField]
-        public ProtoId<CargoProductPrototype> Product;
-
-        /// <summary>
-        /// The number of items in the order. Not readonly, as it might change
-        /// due to caps on the amount of orders that can be placed.
-        /// </summary>
-        [DataField]
-        public int OrderQuantity;
-
-        /// <summary>
-        /// How many instances of this order that we've already dispatched
-        /// </summary>
-        [DataField]
-        public int NumDispatched = 0;
+        public CargoOrderBasketData Basket;
 
         [DataField]
         public string Requester { get; private set; }
@@ -38,7 +25,7 @@ namespace Content.Shared.Cargo
         // public int RequesterId;
         [DataField]
         public string Reason { get; private set; }
-        public  bool Approved;
+        public bool Approved;
         [DataField]
         public string? Approver;
 
@@ -48,11 +35,10 @@ namespace Content.Shared.Cargo
         [DataField]
         public ProtoId<CargoAccountPrototype> Account;
 
-        public CargoOrderData(int orderId, ProtoId<CargoProductPrototype> product, int amount, string requester, string reason, ProtoId<CargoAccountPrototype> account)
+        public CargoOrderData(int orderId, CargoOrderBasketData basket, string requester, string reason, ProtoId<CargoAccountPrototype> account)
         {
             OrderId = orderId;
-            Product = product;
-            OrderQuantity = amount;
+            Basket = basket;
             Requester = requester;
             Reason = reason;
             Account = account;

@@ -9,7 +9,9 @@ using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Shared.Utility;
 using Robust.Shared.Prototypes;
+using System.Linq;
 using static Robust.Client.UserInterface.Controls.BaseButton;
+using System.Text.RegularExpressions;
 
 namespace Content.Client.Cargo.BUI
 {
@@ -44,6 +46,9 @@ namespace Content.Client.Cargo.BUI
         [ViewVariables]
         private CargoProductPrototype? _product;
 
+        [ViewVariables]
+        public CargoOrderBasketData Basket = new();
+
         public CargoOrderConsoleBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
         {
             _cargoSystem = EntMan.System<SharedCargoSystem>();
@@ -58,7 +63,6 @@ namespace Content.Client.Cargo.BUI
             _menu = new CargoConsoleMenu(Owner, EntMan, dependencies.Resolve<IPrototypeManager>(), spriteSystem);
             var localPlayer = dependencies.Resolve<IPlayerManager>().LocalEntity;
             var description = new FormattedMessage();
-
             string orderRequester;
 
             if (EntMan.EntityExists(localPlayer))
@@ -84,19 +88,29 @@ namespace Content.Client.Cargo.BUI
                 _product = row.Product;
                 _orderMenu.ProductName.Text = row.ProductName.Text;
                 _orderMenu.PointCost.Text = row.PointCost.Text;
-                _orderMenu.Requester.Text = orderRequester;
-                _orderMenu.Reason.Text = "";
                 _orderMenu.Amount.Value = 1;
 
                 _orderMenu.OpenCentered();
             };
+            _menu.Requester.Text = orderRequester;
+            _menu.Reason.Text = "";
             _menu.OnOrderApproved += ApproveOrder;
             _menu.OnOrderCanceled += RemoveOrder;
-            _orderMenu.SubmitButton.OnPressed += (_) =>
+            _menu.Submit.OnPressed += (_) =>
             {
                 if (AddOrder())
                 {
+                    Basket.Products.Clear();
+                }
+            };
+
+
+            _orderMenu.SubmitButton.OnPressed += (_) =>
+            {
+                if (AddItem())
+                {
                     _orderMenu.Close();
+                    _menu.PopulateBasket(Basket);
                 }
             };
 
@@ -120,8 +134,9 @@ namespace Content.Client.Cargo.BUI
 
             _menu.PopulateProducts();
             _menu.PopulateCategories();
-            _menu.PopulateOrders(orders);
+            _menu.PopulateBasket(Basket);
             _menu.PopulateAccountActions();
+            _menu.PopulateOrders(orders);
         }
 
         protected override void UpdateState(BoundUserInterfaceState state)
@@ -158,20 +173,44 @@ namespace Content.Client.Cargo.BUI
             _orderMenu?.Dispose();
         }
 
-        private bool AddOrder()
+        private bool AddItem()
         {
             var orderAmt = _orderMenu?.Amount.Value ?? 0;
-            if (orderAmt < 1 || orderAmt > OrderCapacity)
+            if (IsInBasket(Basket, _product?.ID ?? "", out var item))
             {
-                return false;
+                if (item == null)
+                    return false;
+                item.Quantity += orderAmt;
             }
+            else
+            {
+                Basket.Products.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? true));
+            }
+            if (_menu == null)
+                return false;
+            return true;
+        }
 
+        private bool IsInBasket(CargoOrderBasketData basket, string product, out CargoOrderItemData? itemDataOut)
+        {
+            var matches = Basket.Products.Where(item => item.Product == product);
+            foreach (var match in matches)
+            {
+                itemDataOut = match;
+                return true;
+            }
+            itemDataOut = null;
+            return false;
+        }
+
+        private bool AddOrder()
+        {
             SendMessage(new CargoConsoleAddOrderMessage(
-                _orderMenu?.Requester.Text ?? "",
-                _orderMenu?.Reason.Text ?? "",
-                _product?.ID ?? "",
-                orderAmt));
-
+                _menu?.Requester.Text ?? "",
+                _menu?.Reason.Text ?? "",
+                Basket));
+            var basket = new CargoOrderBasketData();
+            Basket = basket;
             return true;
         }
 

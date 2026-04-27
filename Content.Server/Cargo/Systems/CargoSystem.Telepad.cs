@@ -44,10 +44,10 @@ public sealed partial class CargoSystem
             if (!TryGetLinkedConsole((uid, tele), out var console) ||
                 console.Value.Owner != args.OrderConsole.Owner)
                 continue;
-
-            for (var i = 0; i < args.Order.OrderQuantity; i++)
+            var containers = SortOrders(args.Order);
+            for (var i = 0; i < containers.Count; i++)
             {
-                tele.CurrentOrders.Add(args.Order);
+                tele.CurrentOrders.Add(containers[i]);
             }
             tele.Accumulator = tele.Delay;
             args.Handled = true;
@@ -105,7 +105,7 @@ public sealed partial class CargoSystem
             }
 
             var currentOrder = comp.CurrentOrders.First();
-            if (FulfillOrder(currentOrder, currentOrder.Account, xform.Coordinates, comp.PrinterOutput))
+            if (FulfillOrder(currentOrder, xform.Coordinates, comp.PrinterOutput))
             {
                 _audio.PlayPvs(_audio.ResolveSound(comp.TeleportSound), uid, AudioParams.Default.WithVolume(-8f));
 
@@ -146,10 +146,7 @@ public sealed partial class CargoSystem
         if (!TryGetLinkedConsole(ent, out var console))
             return;
 
-        foreach (var order in ent.Comp.CurrentOrders)
-        {
-            TryFulfillOrder((station, data), console.Value.Comp.Account, order, db);
-        }
+        TryFulfillOrder((station, data), console.Value.Comp.Account, ent.Comp.CurrentOrders, db);
     }
 
     private void SetEnabled(EntityUid uid, CargoTelepadComponent component, ApcPowerReceiverComponent? receiver = null,
