@@ -23,7 +23,7 @@ cargo-console-menu-populate-categories-all-text = All
 cargo-console-menu-order-row-title = Order {$orderID}
 cargo-console-menu-populate-orders-cargo-order-row-product-name-text = Requested by: {$orderRequester} from [color={$accountColor}]{$account}[/color]
 cargo-console-menu-order-row-product-description = Reason: {$orderReason}
-    {"Requested by: "}{$orderRequester}{" from "}{"[color={$accountColor}]"}{$account}{"[/color]"}
+    {"Requested by: {$orderRequester} from [color={$accountColor}]{$account}[/color]"}
 cargo-console-menu-order-row-button-approve = Approve
 cargo-console-menu-order-row-button-cancel = Cancel
 cargo-console-menu-order-row-alerts-reason-absent = The reason is not specified

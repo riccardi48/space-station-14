@@ -11,10 +11,16 @@
                             MinSize="32 32"
                             RectClipContent="True" />
 
+            <Label Name="Amount"
+                    Access="Public"
+                    ClipText="True"
+                    MinSize="15" />
+            <Control MinWidth="5" />
             <Label Name="ProductName"
                     Access="Public"
                     HorizontalExpand="True"
                     ClipText="True" />
+
             <Control MinWidth="10" />
         </BoxContainer>
     </PanelContainer>

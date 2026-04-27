@@ -249,6 +249,7 @@ namespace Content.Client.Cargo.UI
                     {
                         Icon = { Texture = _spriteSystem.Frame0(prototype.Icon) },
                         ProductName = { Text = prototype.Name },
+                        Amount = { Text = $"x{item.Quantity}" },
                         PointCost = { Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (prototype.Cost * item.Quantity).ToString())) },
                     };
                     row.Products.AddChild(rowrow);
