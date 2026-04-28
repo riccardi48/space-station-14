@@ -101,6 +101,8 @@ namespace Content.Client.Cargo.BUI
                 if (AddOrder())
                 {
                     Basket.Products.Clear();
+                    _menu.Requester.Text = orderRequester;
+                    _menu.Reason.Text = "";
                 }
             };
 

@@ -625,7 +625,7 @@ namespace Content.Server.Cargo.Systems
                 for (int i = 0; i < containers.Count; i++)
                 {
                     if (containers[i].Container != ""
-                        && containers[i].Container == productProto.Container.Crate
+                        && (ProtoId<CargoCratePrototype>)containers[i].Container == productProto.Container.Crate
                         && containers[i].Products.Count <= containers[i].MaxItems - item.Quantity
                         && containers[i].CrateRequired == item.ContainerRequired)
                     {
@@ -652,7 +652,7 @@ namespace Content.Server.Cargo.Systems
             {
                 container.LableMessage = GetContainerLabel(container, order);
                 container.LableName = Loc.GetString("cargo-console-paper-print-name", ("orderNumber", order.OrderId));
-                var parcel = "WrappedParcel";
+                var parcel = (ProtoId<CargoCratePrototype>)"WrappedParcel";
                 if (!container.IsSingleProduct && container.Products.Count == 1 && !container.CrateRequired)
                 {
                     if (!_protoMan.TryIndex<CargoCratePrototype>(parcel, out var crate))

@@ -12,14 +12,14 @@
                             RectClipContent="True" />
 
             <Label Name="Amount"
-                    Access="Public"
-                    ClipText="True"
-                    MinSize="15" />
+                Access="Public"
+                ClipText="True"
+                MinSize="15 32" />
             <Control MinWidth="5" />
             <Label Name="ProductName"
-                    Access="Public"
-                    HorizontalExpand="True"
-                    ClipText="True" />
+                Access="Public"
+                HorizontalExpand="True"
+                ClipText="True" />
 
             <Control MinWidth="10" />
         </BoxContainer>
