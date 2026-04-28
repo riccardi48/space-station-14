@@ -145,7 +145,7 @@ namespace Content.Shared.Cargo.Prototypes
         public EntProtoId<ContainerManagerComponent> Entity;
         [DataField(required: true)]
         public string ContainerId = string.Empty;
-        [DataField]
-        public int? Cost;
+        [DataField(required: true)]
+        public int MaxItems;
     }
 }

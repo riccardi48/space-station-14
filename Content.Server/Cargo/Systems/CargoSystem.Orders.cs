@@ -172,16 +172,19 @@ namespace Content.Server.Cargo.Systems
                 var tryGetIdentityShortInfoEvent = new TryGetIdentityShortInfoEvent(uid, player);
                 RaiseLocalEvent(tryGetIdentityShortInfoEvent);
                 order.SetApproverData(tryGetIdentityShortInfoEvent.Title);
-                var message = "";
+                var message = Loc.GetString("cargo-console-unlock-approved-order-broadcast-header",
+                    ("orderID", order.OrderId));
+                message += "\n";
                 foreach (var product in order.Basket.Products)
                 {
                     if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
                         return;
-                    message += Loc.GetString("cargo-console-unlock-approved-order-broadcast-short",
+                    message += Loc.GetString("cargo-console-unlock-approved-order-broadcast-item",
                     ("productName", Loc.GetString(productProto.Name)),
                     ("orderAmount", product.Quantity));
+                    message += "\n";
                 }
-                message += Loc.GetString("cargo-console-unlock-approved-order-broadcast",
+                message += Loc.GetString("cargo-console-unlock-approved-order-broadcast-footer",
                     ("approver", order.Approver ?? string.Empty),
                     ("cost", cost));
                 _radio.SendRadioMessage(uid, message, account.RadioChannel, uid, escapeMarkup: false);
@@ -202,7 +205,6 @@ namespace Content.Server.Cargo.Systems
                 LogImpact.Low,
                 $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, products:{adminString}, requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}");
 
-            orderDatabase.Orders[component.Account].Remove(order);
             UpdateBankAccount((station.Value, bank), -cost, order.Account);
             UpdateOrders(station.Value);
         }
@@ -351,7 +353,8 @@ namespace Content.Server.Cargo.Systems
                     GetOutstandingOrderCount((station!.Value, orderDatabase), console.Account),
                     orderDatabase.Capacity,
                     GetNetEntity(station.Value),
-                    RelevantOrders((station!.Value, orderDatabase), (consoleUid, console)),
+                    RelevantOrders((station!.Value, orderDatabase), (consoleUid, console), approved: false),
+                    RelevantOrders((station!.Value, orderDatabase), (consoleUid, console), approved: true),
                     GetAvailableProducts((consoleUid, console))
                 ));
             }
@@ -360,21 +363,23 @@ namespace Content.Server.Cargo.Systems
         /// <summary>
         /// Gets orders relevant to this account, i.e. orders on the account directly or orders on behalf of the account in the primary account.
         /// </summary>
-        private List<CargoOrderData> RelevantOrders(Entity<StationCargoOrderDatabaseComponent> station, Entity<CargoOrderConsoleComponent> console)
+        private List<CargoOrderData> RelevantOrders(Entity<StationCargoOrderDatabaseComponent> station, Entity<CargoOrderConsoleComponent> console, bool approved = false)
         {
             if (!TryComp<StationBankAccountComponent>(station, out var bank))
                 return [];
 
             var ourOrders = station.Comp.Orders[console.Comp.Account];
 
-            if (console.Comp.Account == bank.PrimaryAccount)
-                return ourOrders;
+            IEnumerable<CargoOrderData> orders = ourOrders;
 
-            var otherOrders = station.Comp.Orders[bank.PrimaryAccount].Where(order => order.Account == console.Comp.Account);
+            if (console.Comp.Account != bank.PrimaryAccount)
+            {
+                var otherOrders = station.Comp.Orders[bank.PrimaryAccount].Where(order => order.Account == console.Comp.Account);
+                orders = ourOrders.Concat(otherOrders);
+            }
 
-            return ourOrders.Concat(otherOrders).ToList();
+            return [.. orders.Where(order => order.Approved == approved)];
         }
-
         private void ConsolePopup(EntityUid actor, string text)
         {
             _popup.PopupCursor(text, actor);
@@ -624,8 +629,10 @@ namespace Content.Server.Cargo.Systems
                 var foundMatch = false;
                 for (int i = 0; i < containers.Count; i++)
                 {
+                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container.Crate, out var crate))
+                        continue;
                     if (containers[i].Container != ""
-                        && (ProtoId<CargoCratePrototype>)containers[i].Container == productProto.Container.Crate
+                        && (EntProtoId)containers[i].Container == crate.Entity
                         && containers[i].Products.Count <= containers[i].MaxItems - item.Quantity
                         && containers[i].CrateRequired == item.ContainerRequired)
                     {
@@ -641,7 +648,7 @@ namespace Content.Server.Cargo.Systems
                 {
                     if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container.Crate, out var crate))
                         continue;
-                    containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: item.ContainerRequired));
+                    containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: item.ContainerRequired, maxItems: crate.MaxItems));
                     for (int j = 0; j < item.Quantity; j++)
                     {
                         containers.Last().Products.Add(item);
@@ -655,10 +662,10 @@ namespace Content.Server.Cargo.Systems
                 var parcel = (ProtoId<CargoCratePrototype>)"WrappedParcel";
                 if (!container.IsSingleProduct && container.Products.Count == 1 && !container.CrateRequired)
                 {
-                    if (!_protoMan.TryIndex<CargoCratePrototype>(parcel, out var crate))
+                    if (!_protoMan.Resolve<CargoCratePrototype>(parcel, out var crate))
                         continue;
                     container.Container = crate.Entity;
-                    container.Container = crate.ContainerId;
+                    container.ContainerID = crate.ContainerId;
                 }
             }
             return containers;
@@ -675,7 +682,7 @@ namespace Content.Server.Cargo.Systems
                 message = Loc.GetString(
                     "cargo-console-paper-print-text",
                     ("orderNumber", order.OrderId),
-                    ("itemName", singleProto!.Name),
+                    ("itemName", Loc.GetString(singleProto!.Name)),
                     ("requester", order.Requester),
                     ("reason", string.IsNullOrWhiteSpace(order.Reason) ? Loc.GetString("cargo-console-paper-reason-default") : order.Reason),
                     ("account", Loc.GetString(accountProto.Name)),
@@ -685,7 +692,7 @@ namespace Content.Server.Cargo.Systems
             else
             {
                 message = Loc.GetString("cargo-console-paper-print-header", ("orderNumber", order.OrderId));
-
+                message += "\n";
                 var groupedProducts = from x in container.Products
                                       group x by x.Product into g
                                       let count = g.Count()
@@ -695,11 +702,14 @@ namespace Content.Server.Cargo.Systems
                 foreach (var product in groupedProducts)
                 {
                     if (!_protoMan.TryIndex<CargoProductPrototype>(product.Value, out var productProto))
-                        return "";
-
+                    {
+                        message += "\n";
+                        continue;
+                    }
                     message += Loc.GetString("cargo-console-paper-print-item",
-                        ("itemName", productProto.Name),
+                        ("itemName", Loc.GetString(productProto.Name)),
                         ("orderQuantity", product.Count));
+                    message += "\n";
                 }
                 message += Loc.GetString("cargo-console-paper-print-footer",
                     ("requester", order.Requester),

@@ -189,7 +189,20 @@ namespace Content.Client.Cargo.UI
                 var requester = !string.IsNullOrEmpty(order.Requester) ?
                     order.Requester : Loc.GetString("cargo-console-menu-order-row-alerts-requester-unknown");
                 var account = _protoManager.Index(order.Account);
-
+                var description = !string.IsNullOrEmpty(order.Reason) ?
+                            Loc.GetString(
+                                "cargo-console-menu-order-row-product-reason",
+                                ("orderReason", order.Reason))
+                        :
+                            Loc.GetString(
+                                "cargo-console-menu-order-row-product-reason",
+                                ("orderReason", Loc.GetString("cargo-console-menu-order-row-alerts-reason-absent")));
+                description += "\n";
+                description += Loc.GetString(
+                                "cargo-console-menu-order-row-product-description",
+                                ("orderRequester", requester),
+                                ("accountColor", account.Color),
+                                ("account", Loc.GetString(account.Code)));
                 var row = new CargoOrderRow
                 {
                     Order = order,
@@ -221,18 +234,7 @@ namespace Content.Client.Cargo.UI
 
                     Description =
                     {
-                        Text = !string.IsNullOrEmpty(order.Reason) ?
-                            Loc.GetString(
-                                "cargo-console-menu-order-row-product-description",
-                                ("orderRequester", requester),
-                                ("orderReason", order.Reason),
-                                ("accountColor", account.Color),
-                                ("account", Loc.GetString(account.Code)))
-
-                        :
-                            Loc.GetString(
-                                "cargo-console-menu-order-row-product-description",
-                                ("orderReason", Loc.GetString("cargo-console-menu-order-row-alerts-reason-absent")))
+                        Text = description
                     },
 
                     BasketTotal =
@@ -264,6 +266,92 @@ namespace Content.Client.Cargo.UI
                 Orders.AddChild(row);
             }
         }
+
+        public void PopulateOrderHistory(IEnumerable<CargoOrderData> orderHistory)
+        {
+            if (!_orderConsoleQuery.TryComp(_owner, out var orderConsole))
+                return;
+
+            OrderHistory.RemoveAllChildren();
+
+            foreach (var order in orderHistory)
+            {
+                var requester = !string.IsNullOrEmpty(order.Requester) ?
+                    order.Requester : Loc.GetString("cargo-console-menu-order-row-alerts-requester-unknown");
+                var account = _protoManager.Index(order.Account);
+                var description = !string.IsNullOrEmpty(order.Reason) ?
+                            Loc.GetString(
+                                "cargo-console-menu-order-row-product-reason",
+                                ("orderReason", order.Reason))
+                        :
+                            Loc.GetString(
+                                "cargo-console-menu-order-row-product-reason",
+                                ("orderReason", Loc.GetString("cargo-console-menu-order-row-alerts-reason-absent")));
+                description += "\n";
+                description += Loc.GetString(
+                                "cargo-console-menu-order-row-product-description",
+                                ("orderRequester", requester),
+                                ("accountColor", account.Color),
+                                ("account", Loc.GetString(account.Code)));
+                var row = new CargoOrderHistoryRow
+                {
+                    Order = order,
+
+                    Title =
+                    {
+                        Text = Loc.GetString(
+                            "cargo-console-menu-order-row-title",
+                            ("orderID", order.OrderId)),
+                    },
+
+                    Stride =
+                    {
+                        PanelOverride = new StyleBoxFlat
+                        {
+                            BackgroundColor = account.Color,
+                            ContentMarginBottomOverride = 2,
+                        },
+                    },
+
+                    StrideStride =
+                    {
+                        PanelOverride = new StyleBoxFlat
+                        {
+                            BackgroundColor = account.Color,
+                            ContentMarginBottomOverride = 2,
+                        },
+                    },
+
+                    Description =
+                    {
+                        Text = description
+                    },
+
+                    BasketTotal =
+                    {
+                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", GetBasketTotal(order.Basket).ToString())),
+                    },
+                };
+                foreach (var item in order.Basket.Products)
+                {
+                    if (!_protoManager.Resolve<CargoProductPrototype>(item.Product, out var prototype))
+                        continue;
+
+                    var rowrow = new CargoOrderRowRow
+                    {
+                        Icon = { Texture = _spriteSystem.Frame0(prototype.Icon) },
+                        ProductName = { Text = prototype.Name },
+                        Amount = { Text = $"x{item.Quantity}" },
+                        PointCost = { Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (prototype.Cost * item.Quantity).ToString())) },
+                    };
+                    row.Products.AddChild(rowrow);
+                }
+
+                // TODO: Disable based on access.
+                OrderHistory.AddChild(row);
+            }
+        }
+
 
 
 

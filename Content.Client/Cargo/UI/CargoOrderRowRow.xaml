@@ -13,8 +13,7 @@
 
             <Label Name="Amount"
                 Access="Public"
-                ClipText="True"
-                MinSize="15 32" />
+                MinSize="35 0" />
             <Control MinWidth="5" />
             <Label Name="ProductName"
                 Access="Public"
@@ -32,6 +31,6 @@
             Access="Public"
             HorizontalAlignment="Right"
             Align="Right" />
-        <Control MinWidth="5" />
+        <Control MinWidth="15" />
     </BoxContainer>
 </BoxContainer>

@@ -2,16 +2,16 @@
   id: SteelCrate
   entity: CrateGenericSteel
   containerId: entity_storage
-  cost: 50
+  maxItems: 30
 
 - type: cargoCrate
   id: WrappedParcel
   entity: WrappedParcel
   containerId: contents
-  cost: 20
+  maxItems: 1
 
 - type: cargoCrate
   id: PlasmaCrate
   entity: CratePlasma
   containerId: entity_storage
-  cost: 100
+  maxItems: 30

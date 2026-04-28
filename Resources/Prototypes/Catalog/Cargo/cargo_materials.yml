@@ -1,5 +1,6 @@
 - type: cargoProduct
   id: MaterialGlass
+  name: cargo-order-glass
   icon:
     sprite: Objects/Materials/Sheets/glass.rsi
     state: glass_3
@@ -13,6 +14,7 @@
 
 - type: cargoProduct
   id: MaterialSteel
+  name: cargo-order-steel
   icon:
     sprite: Objects/Materials/Sheets/metal.rsi
     state: steel_3
@@ -25,6 +27,7 @@
 
 - type: cargoProduct
   id: MaterialPlastic
+  name: cargo-order-plastic
   icon:
     sprite: Objects/Materials/Sheets/other.rsi
     state: plastic_3
@@ -37,6 +40,7 @@
 
 - type: cargoProduct
   id: MaterialPlasteel
+  name: cargo-order-plasteel
   icon:
     sprite: Objects/Materials/Sheets/metal.rsi
     state: plasteel_3
@@ -49,6 +53,7 @@
 
 - type: cargoProduct
   id: MaterialGold
+  name: cargo-order-gold
   icon:
     sprite: Objects/Materials/ingots.rsi
     state: gold_3
@@ -61,6 +66,7 @@
 
 - type: cargoProduct
   id: MaterialSilver
+  name: cargo-order-silver
   icon:
     sprite: Objects/Materials/ingots.rsi
     state: silver_3
@@ -73,6 +79,7 @@
 
 - type: cargoProduct
   id: MaterialPlasma
+  name: cargo-order-plasma
   icon:
     sprite: Objects/Materials/Sheets/other.rsi
     state: plasma_3

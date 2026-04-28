@@ -1,0 +1,69 @@
+<PanelContainer
+    xmlns="https://spacestation14.io"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+    HorizontalExpand="True"
+    StyleClasses="BackgroundPanel">
+
+    <!-- Main Container -->
+    <BoxContainer Orientation="Vertical"
+                  HorizontalExpand="True"
+                  SeparationOverride="6"
+                  Margin="-14 -2">
+
+        <BoxContainer Orientation="Vertical">
+            <PanelContainer StyleClasses="WindowHeadingBackground" />
+
+            <BoxContainer Margin="6">
+                <Label Name="Title"
+                        Access="Public"
+                        MaxHeight="28"
+                        StyleClasses="LabelKeyText"/>
+            </BoxContainer>
+
+            <PanelContainer Name="Stride"
+                    Access="Public"
+                    StyleClasses="LowDivider" />
+        </BoxContainer>
+
+        <!-- Info -->
+        <BoxContainer Name = "Products"
+                    Orientation="Vertical"
+                    HorizontalExpand="True"
+                    VerticalExpand="True"
+                    Access="Public">
+            <!-- Products are added here by code -->
+        </BoxContainer>
+        <BoxContainer Orientation="Vertical"
+                        HorizontalExpand="True"
+                        VerticalAlignment="Bottom">
+            <BoxContainer Orientation="Horizontal"
+                        HorizontalExpand="True">
+                <Control MinWidth="5" />
+                <Label Text ="{Loc 'cargo-console-menu-cart-total-label'}"
+                    Access="Public"
+                    HorizontalAlignment="Left" />
+                <Control HorizontalExpand="True" />
+                <Label Name="BasketTotal"
+                    Text = "0"
+                    Access="Public"
+                    HorizontalAlignment="Right"
+                    Align="Right" />
+                <Control MinWidth="15" />
+            </BoxContainer>
+            <PanelContainer Name="StrideStride"
+                Access="Public"
+                StyleClasses="LowDivider" />
+            <BoxContainer Orientation="Horizontal"
+                        HorizontalExpand="True">
+                <Control MinWidth="5" />
+                <Label Name="Description"
+                        Access="Public"
+                        HorizontalExpand="True"
+                        VerticalExpand="True"
+                        StyleClasses="LabelSubText"
+                        ClipText="True" />
+            </BoxContainer>
+        </BoxContainer>
+
+    </BoxContainer>
+</PanelContainer>

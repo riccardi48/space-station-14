@@ -25,7 +25,10 @@ namespace Content.Shared.Cargo
         // public int RequesterId;
         [DataField]
         public string Reason { get; private set; }
-        public bool Approved;
+        [DataField]
+        public bool Approved = false;
+        [DataField]
+        public bool Delivered;
         [DataField]
         public string? Approver;
 

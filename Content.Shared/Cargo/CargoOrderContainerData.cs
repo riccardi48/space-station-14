@@ -18,7 +18,7 @@ namespace Content.Shared.Cargo
         public string ContainerID = string.Empty;
 
         [DataField]
-        public int MaxItems = 30;
+        public int MaxItems;
 
         /// <summary>
         /// The number of items in the order. Not readonly, as it might change
@@ -35,11 +35,12 @@ namespace Content.Shared.Cargo
         public bool IsSingleProduct = false;
         [DataField]
         public bool CrateRequired = false;
-        public CargoOrderContainerData(string container, string containerID, CargoOrderItemData? item = null, bool crateRequired = false)
+        public CargoOrderContainerData(string container, string containerID, CargoOrderItemData? item = null, bool crateRequired = false, int maxItems = 30)
         {
             Container = container;
             ContainerID = containerID;
             CrateRequired = crateRequired;
+            MaxItems = maxItems;
             if (item == null)
             {
                 return;

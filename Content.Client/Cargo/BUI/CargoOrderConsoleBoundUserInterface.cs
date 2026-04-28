@@ -101,7 +101,6 @@ namespace Content.Client.Cargo.BUI
                 if (AddOrder())
                 {
                     Basket.Products.Clear();
-                    _menu.Requester.Text = orderRequester;
                     _menu.Reason.Text = "";
                 }
             };
@@ -129,7 +128,7 @@ namespace Content.Client.Cargo.BUI
             _menu.OpenCentered();
         }
 
-        private void Populate(List<CargoOrderData> orders)
+        private void Populate(List<CargoOrderData> orders, List<CargoOrderData> orderHistory)
         {
             if (_menu == null)
                 return;
@@ -139,6 +138,7 @@ namespace Content.Client.Cargo.BUI
             _menu.PopulateBasket(Basket);
             _menu.PopulateAccountActions();
             _menu.PopulateOrders(orders);
+            _menu.PopulateOrderHistory(orderHistory);
         }
 
         protected override void UpdateState(BoundUserInterfaceState state)
@@ -161,7 +161,7 @@ namespace Content.Client.Cargo.BUI
             _menu.ProductCatalogue = cState.Products;
 
             _menu?.UpdateStation(station);
-            Populate(cState.Orders);
+            Populate(cState.Orders, cState.OrderHistory);
         }
 
         protected override void Dispose(bool disposing)
@@ -186,7 +186,7 @@ namespace Content.Client.Cargo.BUI
             }
             else
             {
-                Basket.Products.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? true));
+                Basket.Products.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? false));
             }
             if (_menu == null)
                 return false;

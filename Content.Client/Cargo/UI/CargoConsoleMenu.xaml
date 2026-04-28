@@ -208,8 +208,10 @@
                                 <gfx:StyleBoxFlat BackgroundColor="#040404"/>
                             </PanelContainer.PanelOverride>
 
-                            <BoxContainer Orientation="Vertical">
-                                <ScrollContainer VerticalExpand="True">
+
+                            <ScrollContainer VerticalExpand="True">
+                                <BoxContainer Orientation="Vertical">
+                                    <Control MinHeight="5" />
                                     <BoxContainer Orientation="Horizontal">
                                         <Control MinWidth="10" />
                                         <BoxContainer Name="Orders"
@@ -221,8 +223,8 @@
                                         </BoxContainer>
                                         <Control MinWidth="10" />
                                     </BoxContainer>
-                                </ScrollContainer>
-                            </BoxContainer>
+                                </BoxContainer>
+                            </ScrollContainer>
                         </PanelContainer>
                     </BoxContainer>
                 </BoxContainer>
@@ -249,17 +251,22 @@
                                 <gfx:StyleBoxFlat BackgroundColor="#040404"/>
                             </PanelContainer.PanelOverride>
 
-                            <BoxContainer Orientation="Vertical">
-                                <ScrollContainer VerticalExpand="True">
-                                    <BoxContainer Name="OrdersHistory"
-                                                  Orientation="Vertical"
-                                                  HorizontalExpand="True"
-                                                  VerticalExpand="True">
+                            <ScrollContainer VerticalExpand="True">
+                                <BoxContainer Orientation="Vertical">
+                                    <Control MinHeight="5" />
+                                    <BoxContainer Orientation="Horizontal">
+                                        <Control MinWidth="10" />
+                                        <BoxContainer Name="OrderHistory"
+                                                    Orientation="Vertical"
+                                                    HorizontalExpand="True"
+                                                    VerticalExpand="True">
 
-                                        <!-- Requests are added here by code -->
+                                            <!-- Requests are added here by code -->
+                                        </BoxContainer>
+                                        <Control MinWidth="10" />
                                     </BoxContainer>
-                                </ScrollContainer>
-                            </BoxContainer>
+                                </BoxContainer>
+                            </ScrollContainer>
                         </PanelContainer>
                     </BoxContainer>
                 </BoxContainer>
