@@ -12,6 +12,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockBooze
+  container: CrateSteel
   cost: 3500
   category: cargoproduct-category-name-service
   group: market
@@ -22,6 +23,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockChefvend
+  container: CrateSteel
   cost: 680
   category: cargoproduct-category-name-service
   group: market
@@ -32,6 +34,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockClothes
+  container: CrateSteel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -42,6 +45,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockCostumes
+  container: CrateSteel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -52,6 +56,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDinnerware
+  container: CrateSteel
   cost: 2000
   category: cargoproduct-category-name-service
   group: market
@@ -62,6 +67,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockCondimentStation
+  container: CrateSteel
   cost: 300
   category: cargoproduct-category-name-service
   group: market
@@ -71,7 +77,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockEngineeringFilled
+  product: VendingMachineRestockEngineering
+  container: CrateEngineeringSecure
   cost: 3200
   category: cargoproduct-category-name-engineering
   group: market
@@ -82,6 +89,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockGames
+  container: CrateSteel
   cost: 750
   category: cargoproduct-category-name-service
   group: market
@@ -92,6 +100,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockHotDrinks
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -101,7 +110,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockMedicalFilled
+  product: VendingMachineRestockMedical
+  container: CrateMedicalSecure
   cost: 1750
   category: cargoproduct-category-name-medical
   group: market
@@ -111,7 +121,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockChemVendFilled
+  product: VendingMachineRestockChemVend
+  container: CrateMedicalSecure
   cost: 3820
   category: cargoproduct-category-name-medical
   group: market
@@ -121,7 +132,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockNutriMaxFilled
+  product: VendingMachineRestockNutriMax
+  container: CrateHydroSecure
   cost: 2400
   category: cargoproduct-category-name-hydroponics
   group: market
@@ -132,6 +144,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockPTech
+  container: CrateSteel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -142,6 +155,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockRobustSoftdrinks
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -152,6 +166,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockSalvageEquipment
+  container: CrateSteel
   cost: 1500
   category: cargoproduct-category-name-engineering
   group: market
@@ -161,7 +176,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockSecTechFilled
+  product: VendingMachineRestockSecTech
+  container: CrateSecGear
   cost: 2200
   category: cargoproduct-category-name-security
   group: market
@@ -171,7 +187,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockSeedsFilled
+  product: VendingMachineRestockSeeds
+  container: CrateHydroSecure
   cost: 3600
   category: cargoproduct-category-name-hydroponics
   group: market
@@ -182,6 +199,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockSmokes
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -192,6 +210,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockVendomat
+  container: CrateSteel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -201,7 +220,8 @@
   icon:
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
-  product: CrateVendingMachineRestockRoboticsFilled
+  product: VendingMachineRestockRobotics
+  container: CrateScienceSecure
   cost: 1600
   category: cargoproduct-category-name-science
   group: market
@@ -212,6 +232,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockTankDispenser
+  container: CrateSteel
   cost: 1000
   category: cargoproduct-category-name-atmospherics
   group: market
@@ -222,6 +243,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockHappyHonk
+  container: CrateSteel
   cost: 1050
   category: cargoproduct-category-name-service
   group: market
@@ -232,6 +254,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockGetmoreChocolateCorp
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -242,6 +265,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockChang
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -252,6 +276,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDiscountDans
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -262,6 +287,7 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDonut
+  container: CrateSteel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
