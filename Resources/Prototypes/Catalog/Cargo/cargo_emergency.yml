@@ -3,8 +3,7 @@
   icon:
     sprite: Clothing/Head/Helmets/bombsuit.rsi
     state: icon
-  product: ClothingHeadHelmetBombSuit
-  container: SecGearCrate
+  product: CrateEmergencyExplosive
   cost: 1000
   category: cargoproduct-category-name-emergency
   group: market
