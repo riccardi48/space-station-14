@@ -75,8 +75,7 @@
     state: box
   product: CrayonBox
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 500
   category: cargoproduct-category-name-fun
   group: market

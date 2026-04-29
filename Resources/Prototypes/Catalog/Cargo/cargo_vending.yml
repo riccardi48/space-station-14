@@ -13,8 +13,7 @@
     state: base
   product: VendingMachineRestockBooze
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 3500
   category: cargoproduct-category-name-service
   group: market
@@ -26,8 +25,7 @@
     state: base
   product: VendingMachineRestockChefvend
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 680
   category: cargoproduct-category-name-service
   group: market
@@ -39,8 +37,7 @@
     state: base
   product: VendingMachineRestockClothes
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -52,8 +49,7 @@
     state: base
   product: VendingMachineRestockCostumes
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -65,8 +61,7 @@
     state: base
   product: VendingMachineRestockDinnerware
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 2000
   category: cargoproduct-category-name-service
   group: market
@@ -78,8 +73,7 @@
     state: base
   product: VendingMachineRestockCondimentStation
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 300
   category: cargoproduct-category-name-service
   group: market
@@ -101,8 +95,7 @@
     state: base
   product: VendingMachineRestockGames
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 750
   category: cargoproduct-category-name-service
   group: market
@@ -114,8 +107,7 @@
     state: base
   product: VendingMachineRestockHotDrinks
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -157,8 +149,7 @@
     state: base
   product: VendingMachineRestockPTech
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -170,8 +161,7 @@
     state: base
   product: VendingMachineRestockRobustSoftdrinks
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -183,8 +173,7 @@
     state: base
   product: VendingMachineRestockSalvageEquipment
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 1500
   category: cargoproduct-category-name-engineering
   group: market
@@ -216,8 +205,7 @@
     state: base
   product: VendingMachineRestockSmokes
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -229,8 +217,7 @@
     state: base
   product: VendingMachineRestockVendomat
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -252,8 +239,7 @@
     state: base
   product: VendingMachineRestockTankDispenser
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 1000
   category: cargoproduct-category-name-atmospherics
   group: market
@@ -265,8 +251,7 @@
     state: base
   product: VendingMachineRestockHappyHonk
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 1050
   category: cargoproduct-category-name-service
   group: market
@@ -278,8 +263,7 @@
     state: base
   product: VendingMachineRestockGetmoreChocolateCorp
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -291,8 +275,7 @@
     state: base
   product: VendingMachineRestockChang
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -304,8 +287,7 @@
     state: base
   product: VendingMachineRestockDiscountDans
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -317,8 +299,7 @@
     state: base
   product: VendingMachineRestockDonut
   container:
-    entity: WrappedParcel
-    containerId: contents
+    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market

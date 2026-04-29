@@ -274,7 +274,7 @@ namespace Content.Client.Cargo.UI
 
             OrderHistory.RemoveAllChildren();
 
-            foreach (var order in orderHistory)
+            foreach (var order in orderHistory.Reverse())
             {
                 var requester = !string.IsNullOrEmpty(order.Requester) ?
                     order.Requester : Loc.GetString("cargo-console-menu-order-row-alerts-requester-unknown");

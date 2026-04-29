@@ -91,6 +91,7 @@ namespace Content.Client.Cargo.BUI
                 _orderMenu.Amount.Value = 1;
 
                 _orderMenu.OpenCentered();
+                _orderMenu.SetPositionLast();
             };
             _menu.Requester.Text = orderRequester;
             _menu.Reason.Text = "";

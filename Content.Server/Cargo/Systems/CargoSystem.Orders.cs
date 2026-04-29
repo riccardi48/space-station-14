@@ -623,7 +623,10 @@ namespace Content.Server.Cargo.Systems
                     continue;
                 if (!item.WithContainer || productProto.Container == null)
                 {
-                    containers.Add(new CargoOrderContainerData("", "", item));
+                    for (int j = 0; j < item.Quantity; j++)
+                    {
+                        containers.Add(new CargoOrderContainerData("", "", item));
+                    }
                     continue;
                 }
                 var foundMatch = false;
