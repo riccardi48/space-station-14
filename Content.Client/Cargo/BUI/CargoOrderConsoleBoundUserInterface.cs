@@ -187,7 +187,7 @@ namespace Content.Client.Cargo.BUI
             }
             else
             {
-                Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? false));
+                Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
             }
             if (_menu == null)
                 return false;

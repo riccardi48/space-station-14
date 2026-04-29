@@ -28,8 +28,6 @@ namespace Content.Shared.Cargo
         [DataField]
         public bool Approved = false;
         [DataField]
-        public bool Delivered;
-        [DataField]
         public string? Approver;
 
         /// <summary>

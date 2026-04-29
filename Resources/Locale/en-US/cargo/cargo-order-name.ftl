@@ -1,8 +1,8 @@
 
-cargo-order-glass = 30 Glass
-cargo-order-steel = 30 Steel
-cargo-order-plastic = 30 Plastic
-cargo-order-plasteel = 10 Plasteel
-cargo-order-gold = 30 Gold Bars
-cargo-order-silver = 30 Silver Bars
-cargo-order-plasma = 30 Plasma
+cargo-order-glass = Glass 30
+cargo-order-steel = Steel 30
+cargo-order-plastic = Plastic 30
+cargo-order-plasteel = Plasteel 30
+cargo-order-gold = Gold Bars 30
+cargo-order-silver = Silver Bars 30
+cargo-order-plasma = Plasma 30

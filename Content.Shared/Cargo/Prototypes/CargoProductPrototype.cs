@@ -96,7 +96,7 @@ namespace Content.Shared.Cargo.Prototypes
         /// The entity to spawn and insert the product into. If null, just the product is spawned.
         /// </summary>
         [DataField]
-        public CargoProductContainer? Container;
+        public ProtoId<CargoCratePrototype>? Container;
 
         /// <summary>
         ///     The point cost of the product.
@@ -117,20 +117,6 @@ namespace Content.Shared.Cargo.Prototypes
         public ProtoId<CargoMarketPrototype> Group { get; private set; } = "market";
     }
 
-    /// <see cref="CargoProductPrototype.Container"/>
-    [DataDefinition, Serializable, NetSerializable]
-    public sealed partial class CargoProductContainer
-    {
-        /// <summary>
-        /// What entity to spawn as the container.
-        /// </summary>
-        [DataField]
-        public ProtoId<CargoCratePrototype> Crate;
-
-        [DataField]
-        public bool? Required;
-    }
-
     [Prototype]
     public sealed partial class CargoCratePrototype : IPrototype
     {
@@ -147,5 +133,7 @@ namespace Content.Shared.Cargo.Prototypes
         public string ContainerId = string.Empty;
         [DataField(required: true)]
         public int MaxItems;
+        [DataField]
+        public bool Required = false;
     }
 }

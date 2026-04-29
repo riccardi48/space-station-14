@@ -13,9 +13,6 @@ namespace Content.Shared.Cargo
 
         [DataField]
         public int Quantity;
-
-        [DataField]
-        public bool ContainerRequired = false;
         [DataField]
         public bool WithContainer = true;
 
@@ -24,11 +21,10 @@ namespace Content.Shared.Cargo
         [DataField]
         public bool HasBeenOrdered = false;
 
-        public CargoOrderItemData(ProtoId<CargoProductPrototype> product, int quantity, bool containerOptional = false)
+        public CargoOrderItemData(ProtoId<CargoProductPrototype> product, int quantity)
         {
             Product = product;
             Quantity = quantity;
-            ContainerRequired = containerOptional;
         }
     }
 }

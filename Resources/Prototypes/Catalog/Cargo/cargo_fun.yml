@@ -74,8 +74,6 @@
     sprite: Objects/Fun/crayons.rsi
     state: box
   product: CrayonBox
-  container:
-    crate: WrappedParcel
   cost: 500
   category: cargoproduct-category-name-fun
   group: market

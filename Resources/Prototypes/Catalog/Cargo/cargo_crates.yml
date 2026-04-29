@@ -14,4 +14,12 @@
   id: PlasmaCrate
   entity: CratePlasma
   containerId: entity_storage
+  required: true
+  maxItems: 30
+
+- type: cargoCrate
+  id: SecGearCrate
+  entity: CrateSecgear
+  containerId: entity_storage
+  required: true
   maxItems: 30

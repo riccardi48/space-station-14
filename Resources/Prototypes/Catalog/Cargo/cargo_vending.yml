@@ -12,8 +12,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockBooze
-  container:
-    crate: WrappedParcel
   cost: 3500
   category: cargoproduct-category-name-service
   group: market
@@ -24,8 +22,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockChefvend
-  container:
-    crate: WrappedParcel
   cost: 680
   category: cargoproduct-category-name-service
   group: market
@@ -36,8 +32,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockClothes
-  container:
-    crate: WrappedParcel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -48,8 +42,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockCostumes
-  container:
-    crate: WrappedParcel
   cost: 2500
   category: cargoproduct-category-name-service
   group: market
@@ -60,8 +52,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDinnerware
-  container:
-    crate: WrappedParcel
   cost: 2000
   category: cargoproduct-category-name-service
   group: market
@@ -72,8 +62,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockCondimentStation
-  container:
-    crate: WrappedParcel
   cost: 300
   category: cargoproduct-category-name-service
   group: market
@@ -94,8 +82,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockGames
-  container:
-    crate: WrappedParcel
   cost: 750
   category: cargoproduct-category-name-service
   group: market
@@ -106,8 +92,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockHotDrinks
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -148,8 +132,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockPTech
-  container:
-    crate: WrappedParcel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -160,8 +142,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockRobustSoftdrinks
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -172,8 +152,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockSalvageEquipment
-  container:
-    crate: WrappedParcel
   cost: 1500
   category: cargoproduct-category-name-engineering
   group: market
@@ -204,8 +182,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockSmokes
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -216,8 +192,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockVendomat
-  container:
-    crate: WrappedParcel
   cost: 1200
   category: cargoproduct-category-name-service
   group: market
@@ -238,8 +212,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockTankDispenser
-  container:
-    crate: WrappedParcel
   cost: 1000
   category: cargoproduct-category-name-atmospherics
   group: market
@@ -250,8 +222,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockHappyHonk
-  container:
-    crate: WrappedParcel
   cost: 1050
   category: cargoproduct-category-name-service
   group: market
@@ -262,8 +232,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockGetmoreChocolateCorp
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -274,8 +242,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockChang
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -286,8 +252,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDiscountDans
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market
@@ -298,8 +262,6 @@
     sprite: Objects/Specific/Service/vending_machine_restock.rsi
     state: base
   product: VendingMachineRestockDonut
-  container:
-    crate: WrappedParcel
   cost: 600
   category: cargoproduct-category-name-service
   group: market

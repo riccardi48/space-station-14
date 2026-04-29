@@ -4,8 +4,7 @@
   icon:
     sprite: Objects/Materials/Sheets/glass.rsi
     state: glass_3
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   product: SheetGlass
   cost: 500
   category: cargoproduct-category-name-materials
@@ -18,8 +17,7 @@
   icon:
     sprite: Objects/Materials/Sheets/metal.rsi
     state: steel_3
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   product: SheetSteel
   cost: 500
   category: cargoproduct-category-name-materials
@@ -31,8 +29,7 @@
   icon:
     sprite: Objects/Materials/Sheets/other.rsi
     state: plastic_3
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   product: SheetPlastic
   cost: 750
   category: cargoproduct-category-name-materials
@@ -45,8 +42,7 @@
     sprite: Objects/Materials/Sheets/metal.rsi
     state: plasteel_3
   product: SheetPlasteel
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   cost: 1600
   category: cargoproduct-category-name-materials
   group: market
@@ -58,8 +54,7 @@
     sprite: Objects/Materials/ingots.rsi
     state: gold_3
   product: IngotGold
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   cost: 3225
   category: cargoproduct-category-name-materials
   group: market
@@ -71,8 +66,7 @@
     sprite: Objects/Materials/ingots.rsi
     state: silver_3
   product: IngotSilver
-  container:
-    crate: SteelCrate
+  container: SteelCrate
   cost: 2580
   category: cargoproduct-category-name-materials
   group: market
@@ -84,9 +78,7 @@
     sprite: Objects/Materials/Sheets/other.rsi
     state: plasma_3
   product: SheetPlasma
-  container:
-    crate: PlasmaCrate
-    required: true
+  container: PlasmaCrate
   cost: 500
   category: cargoproduct-category-name-materials
   group: market

@@ -282,7 +282,7 @@ namespace Content.Server.Cargo.Systems
             if (args.Actor is not { Valid: true } player)
                 return;
 
-            if (args.Basket.Products.Count <= 0)
+            if (args.Basket.Count <= 0)
                 return;
 
             var stationUid = _station.GetOwningStation(uid);
@@ -294,7 +294,7 @@ namespace Content.Server.Cargo.Systems
                 return;
 
             var availableProducts = GetAvailableProducts((uid, component));
-            foreach (var product in args.Basket.Products)
+            foreach (var product in args.Basket)
             {
                 if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var _))
                 {
@@ -317,7 +317,7 @@ namespace Content.Server.Cargo.Systems
 
             // Log order addition
             var adminString = "";
-            foreach (var product in args.Basket.Products)
+            foreach (var product in args.Basket)
             {
                 adminString += $"{product.Quantity} {product},";
             }
@@ -451,7 +451,7 @@ namespace Content.Server.Cargo.Systems
 
         public bool AddAndApproveOrder(
             EntityUid dbUid,
-            CargoOrderBasketData basket,
+            List<CargoOrderItemData> basket,
             string sender,
             string description,
             string dest,
@@ -581,7 +581,6 @@ namespace Content.Server.Cargo.Systems
                 {
                     if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
                         return false;
-
                     var itemEntity = Spawn(productProto.Product, spawn);
                     if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
                         !_container.Insert(itemEntity, container1, force: true))
@@ -632,12 +631,12 @@ namespace Content.Server.Cargo.Systems
                 var foundMatch = false;
                 for (int i = 0; i < containers.Count; i++)
                 {
-                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container.Crate, out var crate))
+                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
                         continue;
                     if (containers[i].Container != ""
                         && (EntProtoId)containers[i].Container == crate.Entity
-                        && containers[i].Products.Count <= containers[i].MaxItems - item.Quantity
-                        && containers[i].CrateRequired == item.ContainerRequired)
+                        && GetContainerEntityCount(containers[i]) <= containers[i].MaxItems - item.Quantity
+                        && containers[i].CrateRequired == crate.Required)
                     {
                         for (int j = 0; j < item.Quantity; j++)
                         {
@@ -649,9 +648,9 @@ namespace Content.Server.Cargo.Systems
                 }
                 if (!foundMatch)
                 {
-                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container.Crate, out var crate))
+                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
                         continue;
-                    containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: item.ContainerRequired, maxItems: crate.MaxItems));
+                    containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: crate.Required, maxItems: crate.MaxItems));
                     for (int j = 0; j < item.Quantity; j++)
                     {
                         containers.Last().Products.Add(item);
@@ -663,7 +662,7 @@ namespace Content.Server.Cargo.Systems
                 container.LableMessage = GetContainerLabel(container, order);
                 container.LableName = Loc.GetString("cargo-console-paper-print-name", ("orderNumber", order.OrderId));
                 var parcel = (ProtoId<CargoCratePrototype>)"WrappedParcel";
-                if (!container.IsSingleProduct && container.Products.Count == 1 && !container.CrateRequired)
+                if (!container.IsSingleProduct && GetContainerEntityCount(container) == 1 && !container.CrateRequired)
                 {
                     if (!_protoMan.Resolve<CargoCratePrototype>(parcel, out var crate))
                         continue;
@@ -672,6 +671,21 @@ namespace Content.Server.Cargo.Systems
                 }
             }
             return containers;
+        }
+
+        private int GetContainerEntityCount(CargoOrderContainerData container)
+        {
+            return container.Products.Count;
+            //
+            //var count = 0;
+            //foreach (var item in container.Products)
+            //{
+            //    if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
+            //        return 0;
+            //    count += item.Quantity * productProto.Products.Count;
+            //}
+            //return count;
+            //
         }
 
         private string GetContainerLabel(CargoOrderContainerData container, CargoOrderData order)

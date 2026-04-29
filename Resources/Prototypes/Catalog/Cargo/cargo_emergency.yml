@@ -3,7 +3,8 @@
   icon:
     sprite: Clothing/Head/Helmets/bombsuit.rsi
     state: icon
-  product: CrateEmergencyExplosive
+  product: ClothingHeadHelmetBombSuit
+  container: SecGearCrate
   cost: 1000
   category: cargoproduct-category-name-emergency
   group: market
@@ -55,9 +56,6 @@
     sprite: Objects/Misc/inflatable_wall.rsi
     state: item_wall
   product: BoxInflatable
-  container:
-    entity: WrappedParcel
-    containerId: contents
   cost: 500
   category: cargoproduct-category-name-emergency
   group: market
