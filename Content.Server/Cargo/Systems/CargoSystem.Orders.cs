@@ -517,26 +517,16 @@ namespace Content.Server.Cargo.Systems
 
         private bool PopFrontOrder(StationCargoOrderDatabaseComponent orderDB, ProtoId<CargoAccountPrototype> account, [NotNullWhen(true)] out CargoOrderContainerData? containerOut)
         {
-            var orderIdx = orderDB.Orders[account].FindIndex(order => order.Approved);
-            if (orderIdx == -1)
+            var undeliveredContainers = orderDB.Orders[account].Where(order => order.Approved && order.Basket.Any(item => !item.HasBeenOrdered));
+            if (undeliveredContainers.Count() == 0)
             {
                 containerOut = null;
                 return false;
             }
 
-            var order = orderDB.Orders[account][orderIdx];
+            var order = undeliveredContainers.First();
             var containers = SortOrders(order);
 
-            if (containers.Count <= 1)
-            {
-                // Order is complete. Remove from the queue.
-                orderDB.Orders[account].RemoveAt(orderIdx);
-            }
-            if (containers.Count == 0)
-            {
-                containerOut = null;
-                return false;
-            }
             containerOut = containers[0];
             return true;
         }
@@ -618,7 +608,7 @@ namespace Content.Server.Cargo.Systems
                     continue;
                 if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
                     continue;
-                if (!item.ToBeOrdered)
+                if (!item.ToBeOrdered || item.HasBeenOrdered)
                     continue;
                 if (!item.WithContainer || productProto.Container == null)
                 {
@@ -650,10 +640,15 @@ namespace Content.Server.Cargo.Systems
                 {
                     if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
                         continue;
-                    containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: crate.Required, maxItems: crate.MaxItems));
-                    for (int j = 0; j < item.Quantity; j++)
+                    var itemsRemaining = item.Quantity;
+                    while (itemsRemaining > 0)
                     {
-                        containers.Last().Products.Add(item);
+                        containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: crate.Required, maxItems: crate.MaxItems));
+                        for (int j = 0; j < Math.Min(itemsRemaining, crate.MaxItems); j++)
+                        {
+                            containers.Last().Products.Add(item);
+                            itemsRemaining -= 1;
+                        }
                     }
                 }
             }
