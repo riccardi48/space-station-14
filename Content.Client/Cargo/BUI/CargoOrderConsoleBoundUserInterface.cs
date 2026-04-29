@@ -47,7 +47,7 @@ namespace Content.Client.Cargo.BUI
         private CargoProductPrototype? _product;
 
         [ViewVariables]
-        public CargoOrderBasketData Basket = new();
+        public List<CargoOrderItemData> Basket = new();
 
         public CargoOrderConsoleBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
         {
@@ -101,7 +101,7 @@ namespace Content.Client.Cargo.BUI
             {
                 if (AddOrder())
                 {
-                    Basket.Products.Clear();
+                    Basket.Clear();
                     _menu.Reason.Text = "";
                 }
             };
@@ -187,16 +187,16 @@ namespace Content.Client.Cargo.BUI
             }
             else
             {
-                Basket.Products.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? false));
+                Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt, _product?.Container?.Required ?? false));
             }
             if (_menu == null)
                 return false;
             return true;
         }
 
-        private bool IsInBasket(CargoOrderBasketData basket, string product, out CargoOrderItemData? itemDataOut)
+        private bool IsInBasket(List<CargoOrderItemData> basket, string product, out CargoOrderItemData? itemDataOut)
         {
-            var matches = Basket.Products.Where(item => item.Product == product);
+            var matches = Basket.Where(item => item.Product == product);
             foreach (var match in matches)
             {
                 itemDataOut = match;
@@ -212,7 +212,7 @@ namespace Content.Client.Cargo.BUI
                 _menu?.Requester.Text ?? "",
                 _menu?.Reason.Text ?? "",
                 Basket));
-            var basket = new CargoOrderBasketData();
+            var basket = new List<CargoOrderItemData>();
             Basket = basket;
             return true;
         }

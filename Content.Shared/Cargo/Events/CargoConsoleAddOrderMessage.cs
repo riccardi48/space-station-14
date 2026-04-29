@@ -10,9 +10,9 @@ public sealed class CargoConsoleAddOrderMessage : BoundUserInterfaceMessage
 {
     public string Requester;
     public string Reason;
-    public CargoOrderBasketData Basket;
+    public List<CargoOrderItemData> Basket;
 
-    public CargoConsoleAddOrderMessage(string requester, string reason, CargoOrderBasketData basket)
+    public CargoConsoleAddOrderMessage(string requester, string reason, List<CargoOrderItemData> basket)
     {
         Requester = requester;
         Reason = reason;

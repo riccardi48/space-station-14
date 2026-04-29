@@ -17,7 +17,7 @@ namespace Content.Shared.Cargo
         /// The ID of the cargo product ordered.
         /// </summary>
         [DataField]
-        public CargoOrderBasketData Basket;
+        public List<CargoOrderItemData> Basket;
 
         [DataField]
         public string Requester { get; private set; }
@@ -38,7 +38,7 @@ namespace Content.Shared.Cargo
         [DataField]
         public ProtoId<CargoAccountPrototype> Account;
 
-        public CargoOrderData(int orderId, CargoOrderBasketData basket, string requester, string reason, ProtoId<CargoAccountPrototype> account)
+        public CargoOrderData(int orderId, List<CargoOrderItemData> basket, string requester, string reason, ProtoId<CargoAccountPrototype> account)
         {
             OrderId = orderId;
             Basket = basket;

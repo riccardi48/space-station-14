@@ -175,7 +175,7 @@ namespace Content.Server.Cargo.Systems
                 var message = Loc.GetString("cargo-console-unlock-approved-order-broadcast-header",
                     ("orderID", order.OrderId));
                 message += "\n";
-                foreach (var product in order.Basket.Products)
+                foreach (var product in order.Basket)
                 {
                     if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
                         return;
@@ -196,7 +196,7 @@ namespace Content.Server.Cargo.Systems
 
             // Log order approval
             var adminString = "";
-            foreach (var product in order.Basket.Products)
+            foreach (var product in order.Basket)
             {
                 adminString += $"{product.Quantity} {product.Product},";
             }
@@ -470,7 +470,7 @@ namespace Content.Server.Cargo.Systems
 
             // Log order addition
             var adminString = "";
-            foreach (var product in order.Basket.Products)
+            foreach (var product in order.Basket)
             {
                 adminString += $"{product.Quantity} {product.Product},";
             }
@@ -613,7 +613,7 @@ namespace Content.Server.Cargo.Systems
         private List<CargoOrderContainerData> SortOrders(CargoOrderData order)
         {
             List<CargoOrderContainerData> containers = new();
-            foreach (var item in order.Basket.Products)
+            foreach (var item in order.Basket)
             {
                 if (item == null)
                     continue;
@@ -727,7 +727,7 @@ namespace Content.Server.Cargo.Systems
         public int GetOrderCost(CargoOrderData order)
         {
             var cost = 0;
-            foreach (var product in order.Basket.Products)
+            foreach (var product in order.Basket)
             {
                 if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
                 {
