@@ -5,7 +5,7 @@ using Robust.Shared.Serialization;
 namespace Content.Shared.Cargo
 {
     [DataDefinition, NetSerializable, Serializable]
-    public sealed partial class CargoOrderItemData
+    public sealed partial record class CargoOrderItemData
     {
 
         [DataField]
@@ -19,7 +19,7 @@ namespace Content.Shared.Cargo
         [DataField]
         public bool ToBeOrdered = true;
         [DataField]
-        public bool HasBeenOrdered = false;
+        public int NumOrdered = 0;
 
         public CargoOrderItemData(ProtoId<CargoProductPrototype> product, int quantity)
         {

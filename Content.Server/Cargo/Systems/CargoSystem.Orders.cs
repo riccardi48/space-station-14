@@ -198,7 +198,9 @@ namespace Content.Server.Cargo.Systems
             var adminString = "";
             foreach (var product in order.Basket)
             {
-                adminString += $"{product.Quantity} {product.Product},";
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
+                    continue;
+                adminString += $"{product.Quantity} {productProto.Name},";
             }
 
             _adminLogger.Add(LogType.Action,
@@ -319,7 +321,9 @@ namespace Content.Server.Cargo.Systems
             var adminString = "";
             foreach (var product in args.Basket)
             {
-                adminString += $"{product.Quantity} {product},";
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
+                    continue;
+                adminString += $"{product.Quantity} {productProto.Name},";
             }
 
             _adminLogger.Add(LogType.Action,
@@ -472,7 +476,9 @@ namespace Content.Server.Cargo.Systems
             var adminString = "";
             foreach (var product in order.Basket)
             {
-                adminString += $"{product.Quantity} {product.Product},";
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
+                    continue;
+                adminString += $"{product.Quantity} {productProto.Name},";
             }
 
             _adminLogger.Add(LogType.Action,
@@ -517,7 +523,7 @@ namespace Content.Server.Cargo.Systems
 
         private bool PopFrontOrder(StationCargoOrderDatabaseComponent orderDB, ProtoId<CargoAccountPrototype> account, [NotNullWhen(true)] out CargoOrderContainerData? containerOut)
         {
-            var undeliveredContainers = orderDB.Orders[account].Where(order => order.Approved && order.Basket.Any(item => !item.HasBeenOrdered));
+            var undeliveredContainers = orderDB.Orders[account].Where(order => order.Approved && order.Basket.Any(item => item.NumOrdered != item.Quantity));
             if (undeliveredContainers.Count() == 0)
             {
                 containerOut = null;
@@ -556,7 +562,7 @@ namespace Content.Server.Cargo.Systems
                 if (!_protoMan.TryIndex<CargoProductPrototype>(container.Products[0].Product, out singleProto))
                     return false;
                 containerEntity = Spawn(singleProto.Product, spawn);
-                container.Products[0].HasBeenOrdered = true;
+                container.Products.First().NumOrdered += 1;
             }
             else
             {
@@ -571,17 +577,16 @@ namespace Content.Server.Cargo.Systems
                 {
                     if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
                         return false;
-                    var itemEntity = Spawn(productProto.Product, spawn);
-                    if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
-                        !_container.Insert(itemEntity, container1, force: true))
+                    for (int i = 0; i < item.Quantity; i++)
                     {
-                        DebugTools.Assert(
-                            $"Failed to insert cargo product into its specified container. This indicates an error in the cargo product definition's YAML as the product should be insertable into its container. {productProto.Name}: {(EntProtoId)container.Container}");
-                        QueueDel(itemEntity);
-                    }
-                    else
-                    {
-                        item.HasBeenOrdered = true;
+                        var itemEntity = Spawn(productProto.Product, spawn);
+                        if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
+                            !_container.Insert(itemEntity, container1, force: true))
+                        {
+                            DebugTools.Assert(
+                                $"Failed to insert cargo product into its specified container. This indicates an error in the cargo product definition's YAML as the product should be insertable into its container. {productProto.Name}: {(EntProtoId)container.Container}");
+                        }
+                        item.NumOrdered++;
                     }
                 }
             }
@@ -608,48 +613,35 @@ namespace Content.Server.Cargo.Systems
                     continue;
                 if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
                     continue;
-                if (!item.ToBeOrdered || item.HasBeenOrdered)
+                if (!item.ToBeOrdered || item.NumOrdered == item.Quantity)
                     continue;
+                var itemsAdded = item.NumOrdered;
                 if (!item.WithContainer || productProto.Container == null)
                 {
-                    for (int j = 0; j < item.Quantity; j++)
-                    {
-                        containers.Add(new CargoOrderContainerData("", "", item));
-                    }
+                    containers.Add(new CargoOrderContainerData("", "", item));
+                    itemsAdded += item.Quantity;
                     continue;
                 }
-                var foundMatch = false;
+                if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
+                    continue;
                 for (int i = 0; i < containers.Count; i++)
                 {
-                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
-                        continue;
                     if (containers[i].Container != ""
                         && (EntProtoId)containers[i].Container == crate.Entity
                         && GetContainerEntityCount(containers[i]) <= containers[i].MaxItems - item.Quantity
                         && containers[i].CrateRequired == crate.Required)
                     {
-                        for (int j = 0; j < item.Quantity; j++)
-                        {
-                            containers[i].Products.Add(item);
-                        }
-                        foundMatch = true;
+                        containers[i].Products.Add(item);
+                        itemsAdded += item.Quantity;
                         break;
                     }
                 }
-                if (!foundMatch)
+                while (item.Quantity - itemsAdded > 0)
                 {
-                    if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
-                        continue;
-                    var itemsRemaining = item.Quantity;
-                    while (itemsRemaining > 0)
-                    {
-                        containers.Add(new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: crate.Required, maxItems: crate.MaxItems));
-                        for (int j = 0; j < Math.Min(itemsRemaining, crate.MaxItems); j++)
-                        {
-                            containers.Last().Products.Add(item);
-                            itemsRemaining -= 1;
-                        }
-                    }
+                    var container = new CargoOrderContainerData(crate.Entity, crate.ContainerId, crateRequired: crate.Required, maxItems: crate.MaxItems);
+                    container.Products.Add(item with { Quantity = Math.Min(item.Quantity - itemsAdded, crate.MaxItems) });
+                    containers.Add(container);
+                    itemsAdded += Math.Min(item.Quantity - itemsAdded, crate.MaxItems);
                 }
             }
             foreach (var container in containers)
@@ -670,17 +662,13 @@ namespace Content.Server.Cargo.Systems
 
         private int GetContainerEntityCount(CargoOrderContainerData container)
         {
-            return container.Products.Count;
-            //
-            //var count = 0;
-            //foreach (var item in container.Products)
-            //{
-            //    if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
-            //        return 0;
-            //    count += item.Quantity * productProto.Products.Count;
-            //}
-            //return count;
-            //
+            var count = 0;
+            foreach (var item in container.Products)
+            {
+                count += item.Quantity;
+            }
+            return count;
+
         }
 
         private string GetContainerLabel(CargoOrderContainerData container, CargoOrderData order)
@@ -705,22 +693,16 @@ namespace Content.Server.Cargo.Systems
             {
                 message = Loc.GetString("cargo-console-paper-print-header", ("orderNumber", order.OrderId));
                 message += "\n";
-                var groupedProducts = from x in container.Products
-                                      group x by x.Product into g
-                                      let count = g.Count()
-                                      orderby count descending
-                                      select new { Value = g.Key, Count = count };
-
-                foreach (var product in groupedProducts)
+                foreach (var product in container.Products)
                 {
-                    if (!_protoMan.TryIndex<CargoProductPrototype>(product.Value, out var productProto))
+                    if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
                     {
                         message += "\n";
                         continue;
                     }
                     message += Loc.GetString("cargo-console-paper-print-item",
                         ("itemName", Loc.GetString(productProto.Name)),
-                        ("orderQuantity", product.Count));
+                        ("orderQuantity", product.Quantity));
                     message += "\n";
                 }
                 message += Loc.GetString("cargo-console-paper-print-footer",

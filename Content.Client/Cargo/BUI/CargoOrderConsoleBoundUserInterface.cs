@@ -196,14 +196,8 @@ namespace Content.Client.Cargo.BUI
 
         private bool IsInBasket(List<CargoOrderItemData> basket, string product, out CargoOrderItemData? itemDataOut)
         {
-            var matches = Basket.Where(item => item.Product == product);
-            foreach (var match in matches)
-            {
-                itemDataOut = match;
-                return true;
-            }
-            itemDataOut = null;
-            return false;
+            itemDataOut = Basket.FirstOrDefault(item => item.Product == product);
+            return itemDataOut != null;
         }
 
         private bool AddOrder()
@@ -212,8 +206,7 @@ namespace Content.Client.Cargo.BUI
                 _menu?.Requester.Text ?? "",
                 _menu?.Reason.Text ?? "",
                 Basket));
-            var basket = new List<CargoOrderItemData>();
-            Basket = basket;
+            Basket = new List<CargoOrderItemData>();
             return true;
         }
 
