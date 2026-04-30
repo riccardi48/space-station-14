@@ -185,6 +185,14 @@ namespace Content.Server.Cargo.Systems
                 return;
             }
 
+            // Too many orders, avoid them getting spammed in the UI.
+            if (GetOutstandingOrderCount((station.Value, orderDatabase), order.Account) >= orderDatabase.Capacity)
+            {
+                ConsolePopup(args.Actor, Loc.GetString("cargo-console-too-many"));
+                PlayDenySound(uid, component);
+                return;
+            }
+
             var availableProducts = GetAvailableProducts((uid, component));
             var cost = GetBasketCost(order.Basket);
             var accountBalance = GetBalanceFromAccount((station.Value, bank), order.Account);
@@ -465,21 +473,26 @@ namespace Content.Server.Cargo.Systems
             }
         }
 
+        private List<CargoOrderData> RelevantOrders(Entity<StationCargoOrderDatabaseComponent> station, Entity<CargoOrderConsoleComponent> console, bool approved = false)
+        {
+            return RelevantOrders(station, console.Comp.Account, approved);
+        }
+
         /// <summary>
         /// Gets orders relevant to this account, i.e. orders on the account directly or orders on behalf of the account in the primary account.
         /// </summary>
-        private List<CargoOrderData> RelevantOrders(Entity<StationCargoOrderDatabaseComponent> station, Entity<CargoOrderConsoleComponent> console, bool approved = false)
+        private List<CargoOrderData> RelevantOrders(Entity<StationCargoOrderDatabaseComponent> station, ProtoId<CargoAccountPrototype> account, bool approved = false)
         {
             if (!TryComp<StationBankAccountComponent>(station, out var bank))
                 return [];
 
-            var ourOrders = station.Comp.Orders[console.Comp.Account];
+            var ourOrders = station.Comp.Orders[account];
 
             IEnumerable<CargoOrderData> orders = ourOrders;
 
-            if (console.Comp.Account != bank.PrimaryAccount)
+            if (account != bank.PrimaryAccount)
             {
-                var otherOrders = station.Comp.Orders[bank.PrimaryAccount].Where(order => order.Account == console.Comp.Account);
+                var otherOrders = station.Comp.Orders[bank.PrimaryAccount].Where(order => order.Account == account);
                 orders = ourOrders.Concat(otherOrders);
             }
 
@@ -506,33 +519,7 @@ namespace Content.Server.Cargo.Systems
 
         public int GetOutstandingOrderCount(Entity<StationCargoOrderDatabaseComponent> station, ProtoId<CargoAccountPrototype> account)
         {
-            var amount = 0;
-
-            if (!TryComp<StationBankAccountComponent>(station, out var bank))
-                return amount;
-
-            foreach (var order in station.Comp.Orders[account])
-            {
-                if (!order.Approved)
-                    continue;
-                var containers = SortOrders(order);
-                amount += containers.Count;
-            }
-
-            if (account == bank.PrimaryAccount)
-                return amount;
-
-            foreach (var order in station.Comp.Orders[bank.PrimaryAccount])
-            {
-                if (order.Account != account)
-                    continue;
-                if (!order.Approved)
-                    continue;
-                var containers = SortOrders(order);
-                amount += containers.Count;
-            }
-
-            return amount;
+            return RelevantOrders(station, account, false).Count;
         }
 
         /// <summary>
