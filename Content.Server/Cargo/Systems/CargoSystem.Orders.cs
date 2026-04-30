@@ -656,11 +656,10 @@ namespace Content.Server.Cargo.Systems
         {
 
             EntityUid containerEntity;
-            CargoProductPrototype? singleProto = null;
 
             if (container.IsSingleProduct)
             {
-                if (!_protoMan.TryIndex<CargoProductPrototype>(container.Products[0].Product, out singleProto))
+                if (!_protoMan.TryIndex<CargoProductPrototype>(container.Products[0].Product, out var singleProto))
                     return false;
                 containerEntity = Spawn(singleProto.Product, spawn);
                 container.Products.First().NumOrdered += 1;

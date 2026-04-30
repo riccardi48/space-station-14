@@ -13,7 +13,7 @@
 
             <Label Name="Amount"
                 Access="Public"
-                MinSize="35 0" />
+                MinWidth="35" />
             <Control MinWidth="5" />
             <Label Name="ProductName"
                 Access="Public"

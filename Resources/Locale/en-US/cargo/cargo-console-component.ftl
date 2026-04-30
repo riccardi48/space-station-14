@@ -63,10 +63,9 @@ cargo-console-paper-reason-default = None
 cargo-console-paper-approver-default = Self
 cargo-console-paper-print-name = Order #{$orderNumber}
 cargo-console-paper-print-text = [head=2]Order #{$orderNumber}[/head]
-    {"[bold]Item:[/bold]"} {$itemName} (x{$orderQuantity})
-    {"[bold]Requested by:[/bold]"} {$requester}
-
+    {"[bold]Item:[/bold]"} {$itemName}
     {"[head=3]Order Information[/head]"}
+    {"[bold]Requested by:[/bold]"} {$requester}
     {"[bold]Payer[/bold]:"} {$account} [font="Monospace"]\[{$accountcode}\][/font]
     {"[bold]Approved by:[/bold]"} {$approver}
     {"[bold]Reason:[/bold]"} {$reason}

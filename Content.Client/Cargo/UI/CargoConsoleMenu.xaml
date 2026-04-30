@@ -137,6 +137,7 @@
                                                 VerticalAlignment="Bottom">
                                     <BoxContainer Orientation="Horizontal"
                                                 HorizontalExpand="True">
+                                        <Control MinWidth="5" />
                                         <Label Text ="{Loc 'cargo-console-menu-cart-total-label'}"
                                             Access="Public"
                                             HorizontalAlignment="Left" />
