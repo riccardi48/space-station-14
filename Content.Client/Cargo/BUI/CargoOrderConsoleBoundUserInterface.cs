@@ -184,13 +184,9 @@ namespace Content.Client.Cargo.BUI
                 if (item == null)
                     return false;
                 item.Quantity += orderAmt;
+                return true;
             }
-            else
-            {
-                Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
-            }
-            if (_menu == null)
-                return false;
+            Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
             return true;
         }
 
