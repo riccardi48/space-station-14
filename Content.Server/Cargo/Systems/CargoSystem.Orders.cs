@@ -57,6 +57,55 @@ namespace Content.Server.Cargo.Systems
             QueueDel(args.Used);
             args.Handled = true;
         }
+        private void OnInteractUsingSlip(Entity<CargoOrderConsoleComponent> ent, ref InteractUsingEvent args, CargoSlipComponent slip)
+        {
+            if (slip.Basket.Count <= 0)
+                return;
+
+            var stationUid = _station.GetOwningStation(ent);
+
+            if (!TryGetOrderDatabase(stationUid, out var orderDatabase))
+                return;
+
+            var availableProducts = GetAvailableProducts((ent, ent.Comp));
+            foreach (var product in slip.Basket)
+            {
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var _))
+                {
+                    Log.Error($"Tried to add invalid cargo product {product.Product} as order!");
+                    return;
+                }
+                if (!availableProducts.Contains(product.Product))
+                    return;
+            }
+
+            if (!TryComp<StationBankAccountComponent>(stationUid, out var bank))
+                return;
+
+            var orderId = GenerateOrderId(orderDatabase);
+            var data = new CargoOrderData(orderId, slip.Basket, slip.Requester, slip.Reason, slip.Account);
+
+            if (!TryAddOrder(stationUid.Value, slip.Account, data, orderDatabase))
+            {
+                PlayDenySound(ent, ent.Comp);
+                return;
+            }
+
+            // Log order addition
+            var adminString = "";
+            foreach (var product in slip.Basket)
+            {
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
+                    continue;
+                adminString += $"{product.Quantity} {productProto.Name},";
+            }
+
+            _adminLogger.Add(LogType.Action,
+                LogImpact.Low,
+                $"{ToPrettyString(args.User):user} inserted order slip [orderId:{data.OrderId}, products:{adminString}, requester:{data.Requester}, reason:{data.Reason}]");
+            args.Handled = true;
+        }
+
         private void OnInteractUsing(EntityUid uid, CargoOrderConsoleComponent component, ref InteractUsingEvent args)
         {
             if (HasComp<CashComponent>(args.Used))
@@ -65,7 +114,7 @@ namespace Content.Server.Cargo.Systems
             }
             else if (TryComp<CargoSlipComponent>(args.Used, out var slip) && component.Mode == CargoOrderConsoleMode.DirectOrder)
             {
-                return;
+                OnInteractUsingSlip((uid, component), ref args, slip);
             }
         }
 
@@ -137,7 +186,7 @@ namespace Content.Server.Cargo.Systems
             }
 
             var availableProducts = GetAvailableProducts((uid, component));
-            var cost = GetOrderCost(order);
+            var cost = GetBasketCost(order.Basket);
             var accountBalance = GetBalanceFromAccount((station.Value, bank), order.Account);
 
             // Not enough balance
@@ -279,6 +328,52 @@ namespace Content.Server.Cargo.Systems
             RemoveOrder(station.Value, component.Account, args.OrderId, orderDatabase);
         }
 
+        private void OnAddOrderMessageSlipPrinter(EntityUid uid, CargoOrderConsoleComponent component, CargoConsoleAddOrderMessage args)
+        {
+            var stationUid = _station.GetOwningStation(uid);
+
+            if (!TryComp<StationBankAccountComponent>(stationUid, out var bank))
+                return;
+
+            var targetAccount = component.Mode == CargoOrderConsoleMode.SendToPrimary ? bank.PrimaryAccount : component.Account;
+
+            if (!_protoMan.Resolve(targetAccount, out var account))
+                return;
+
+            if (Timing.CurTime < component.NextPrintTime)
+                return;
+
+            var label = Spawn(account.AcquisitionSlip, Transform(uid).Coordinates);
+            component.NextPrintTime = Timing.CurTime + component.PrintDelay;
+            _audio.PlayPvs(component.PrintSound, uid);
+
+            var paper = EnsureComp<PaperComponent>(label);
+
+            var message = Loc.GetString("cargo-acquisition-slip-header");
+            message += "\n";
+            foreach (var product in args.Basket)
+            {
+                if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
+                    return;
+                message += Loc.GetString("cargo-acquisition-slip-item",
+                ("itemName", Loc.GetString(productProto.Name)),
+                ("orderQuantity", product.Quantity),
+                ("cost", productProto.Cost));
+                message += "\n";
+            }
+            message += Loc.GetString("cargo-acquisition-slip-footer",
+                ("cost", GetBasketCost(args.Basket)),
+                ("orderer", args.Requester),
+                ("reason", args.Reason));
+            _paperSystem.SetContent((label, paper), message);
+
+            var slip = EnsureComp<CargoSlipComponent>(label);
+            slip.Basket = args.Basket;
+            slip.Requester = args.Requester;
+            slip.Reason = args.Reason;
+            slip.Account = component.Account;
+        }
+
         private void OnAddOrderMessage(EntityUid uid, CargoOrderConsoleComponent component, CargoConsoleAddOrderMessage args)
         {
             if (args.Actor is not { Valid: true } player)
@@ -305,6 +400,12 @@ namespace Content.Server.Cargo.Systems
                 }
                 if (!availableProducts.Contains(product.Product))
                     return;
+            }
+
+            if (component.Mode == CargoOrderConsoleMode.PrintSlip)
+            {
+                OnAddOrderMessageSlipPrinter(uid, component, args);
+                return;
             }
 
             var targetAccount = component.Mode == CargoOrderConsoleMode.SendToPrimary ? bank.PrimaryAccount : component.Account;
@@ -715,10 +816,10 @@ namespace Content.Server.Cargo.Systems
             return message;
         }
 
-        public int GetOrderCost(CargoOrderData order)
+        public int GetBasketCost(List<CargoOrderItemData> basket)
         {
             var cost = 0;
-            foreach (var product in order.Basket)
+            foreach (var product in basket)
             {
                 if (!_protoMan.TryIndex<CargoProductPrototype>(product.Product, out var productProto))
                 {

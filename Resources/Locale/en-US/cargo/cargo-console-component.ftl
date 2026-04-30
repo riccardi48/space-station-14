@@ -105,14 +105,12 @@ cargo-funding-alloc-console-label-save-fail = [bold]Revenue Divisions Invalid![/
 }{$val}%)[/color]
 
 # Slip template
-cargo-acquisition-slip-body = [head=3]Asset Detail[/head]
-    {"[bold]Product:[/bold]"} {$product}
-    {"[bold]Description:[/bold]"} {$description}
-    {"[bold]Unit cost:[/bold]"} ${$unit}
-    {"[bold]Amount:[/bold]"} {$amount}
-    {"[bold]Cost:[/bold]"} ${$cost}
-
+cargo-acquisition-slip-header = [head=3]Asset Detail[/head]
+cargo-acquisition-slip-item = {"[bold]Item:[/bold]"} {$itemName} (x{$orderQuantity})
+    {"[bold]Unit cost:[/bold]"} ${$cost}
+cargo-acquisition-slip-footer =
     {"[head=3]Purchase Detail[/head]"}
+    {"[bold]Total Cost:[/bold]"} ${$cost}
     {"[bold]Orderer:[/bold]"} {$orderer}
     {"[bold]Reason:[/bold]"} {$reason}
 cargo-console-menu-cart-remove = X
