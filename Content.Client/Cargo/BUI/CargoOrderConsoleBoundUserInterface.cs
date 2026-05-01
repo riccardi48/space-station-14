@@ -9,6 +9,7 @@ using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Shared.Utility;
 using Robust.Shared.Prototypes;
+using System.Linq;
 
 namespace Content.Client.Cargo.BUI
 {

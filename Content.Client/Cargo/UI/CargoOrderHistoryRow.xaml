@@ -64,6 +64,5 @@
                         ClipText="True" />
             </BoxContainer>
         </BoxContainer>
-
     </BoxContainer>
 </PanelContainer>
