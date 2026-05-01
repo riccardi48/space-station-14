@@ -89,18 +89,29 @@ namespace Content.Client.Cargo.BUI
                 _orderMenu.ProductName.Text = row.ProductName.Text;
                 _orderMenu.PointCost.Text = row.PointCost.Text;
                 _orderMenu.Amount.Value = 1;
-                _orderMenu.Requester.Text = orderRequester;
-                _orderMenu.Reason.Text = "";
                 _orderMenu.OpenCentered();
                 _orderMenu.SetPositionLast();
             };
+            _menu.Requester.Text = orderRequester;
+            _menu.Reason.Text = "";
             _menu.OnOrderApproved += ApproveOrder;
             _menu.OnOrderCanceled += RemoveOrder;
-            _orderMenu.SubmitButton.OnPressed += (_) =>
+            _menu.Submit.OnPressed += (_) =>
             {
                 if (AddOrder())
                 {
+                    Basket.Clear();
+                    _menu.Reason.Text = "";
+                }
+            };
+
+
+            _orderMenu.SubmitButton.OnPressed += (_) =>
+            {
+                if (AddItem())
+                {
                     _orderMenu.Close();
+                    _menu.PopulateBasket(Basket);
                 }
             };
 
@@ -124,8 +135,10 @@ namespace Content.Client.Cargo.BUI
 
             _menu.PopulateProducts();
             _menu.PopulateCategories();
-            _menu.PopulateOrders(orders);
+            _menu.PopulateBasket(Basket);
             _menu.PopulateAccountActions();
+            _menu.PopulateOrders(orders);
+            _menu.PopulateOrderHistory(orderHistory);
         }
 
         protected override void UpdateState(BoundUserInterfaceState state)
@@ -148,7 +161,7 @@ namespace Content.Client.Cargo.BUI
             _menu.ProductCatalogue = cState.Products;
 
             _menu?.UpdateStation(station);
-            Populate(cState.Orders);
+            Populate(cState.Orders, cState.OrderHistory);
         }
 
         protected override void Dispose(bool disposing)
@@ -162,12 +175,31 @@ namespace Content.Client.Cargo.BUI
             _orderMenu?.Dispose();
         }
 
+        private bool AddItem()
+        {
+            var orderAmt = _orderMenu?.Amount.Value ?? 0;
+            if (IsInBasket(Basket, _product?.ID ?? "", out var item))
+            {
+                if (item == null)
+                    return false;
+                item.Quantity += orderAmt;
+                return true;
+            }
+            Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
+            return true;
+        }
+
+        private bool IsInBasket(List<CargoOrderItemData> basket, string product, out CargoOrderItemData? itemDataOut)
+        {
+            itemDataOut = Basket.FirstOrDefault(item => item.Product == product);
+            return itemDataOut != null;
+        }
+
         private bool AddOrder()
         {
-            Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
             SendMessage(new CargoConsoleAddOrderMessage(
-                _orderMenu?.Requester.Text ?? "",
-                _orderMenu?.Reason.Text ?? "",
+                _menu?.Requester.Text ?? "",
+                _menu?.Reason.Text ?? "",
                 Basket));
             Basket = new List<CargoOrderItemData>();
             return true;

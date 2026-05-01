@@ -27,6 +27,7 @@ cargo-console-menu-order-row-button-approve = Approve
 cargo-console-menu-order-row-button-cancel = Cancel
 cargo-console-menu-order-row-alerts-reason-absent = The reason is not specified
 cargo-console-menu-order-row-alerts-requester-unknown = Unknown
+cargo-console-menu-tab-title-market = Market
 cargo-console-menu-tab-title-orders = Orders
 cargo-console-menu-tab-title-funds = Transfers
 cargo-console-menu-account-action-transfer-limit = [bold]Transfer Limit:[/bold] ${$limit}
@@ -37,6 +38,10 @@ cargo-console-menu-account-action-button = Transfer
 cargo-console-menu-toggle-account-lock-button = Toggle Transfer Limit
 cargo-console-menu-account-action-option-withdraw = Withdraw Cash
 cargo-console-menu-account-action-option-transfer = Transfer Funds to {$code}
+cargo-console-menu-cart-label = Cart
+cargo-console-menu-cart-submit = Submit
+cargo-console-menu-cart-total-label = Total Cost
+cargo-console-menu-orders-history-label = History
 
 # Orders
 cargo-console-order-not-allowed = Access not allowed
@@ -107,3 +112,4 @@ cargo-acquisition-slip-footer =
     {"[bold]Total Cost:[/bold]"} ${$cost}
     {"[bold]Orderer:[/bold]"} {$orderer}
     {"[bold]Reason:[/bold]"} {$reason}
+cargo-console-menu-cart-remove = X

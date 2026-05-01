@@ -263,7 +263,6 @@ namespace Content.Server.Cargo.Systems
             _adminLogger.Add(LogType.Action,
                 LogImpact.Low,
                 $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, products:{adminString}, requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}");
-            orderDatabase.Orders[component.Account].Remove(order);
             UpdateBankAccount((station.Value, bank), -cost, order.Account);
             UpdateOrders(station.Value);
         }
@@ -467,6 +466,7 @@ namespace Content.Server.Cargo.Systems
                     orderDatabase.Capacity,
                     GetNetEntity(station.Value),
                     RelevantOrders((station!.Value, orderDatabase), (consoleUid, console), approved: false),
+                    RelevantOrders((station!.Value, orderDatabase), (consoleUid, console), approved: true),
                     GetAvailableProducts((consoleUid, console))
                 ));
             }
