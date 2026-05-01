@@ -13,7 +13,7 @@ namespace Content.Shared.Cargo.Components;
 public sealed partial class CargoTelepadComponent : Component
 {
     [DataField]
-    public List<CargoOrderData> CurrentOrders = new();
+    public List<CargoOrderContainerData> CurrentOrders = new();
 
     /// <summary>
     /// The actual amount of time it takes to teleport from the telepad

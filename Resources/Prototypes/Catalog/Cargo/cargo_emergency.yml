@@ -55,9 +55,7 @@
     sprite: Objects/Misc/inflatable_wall.rsi
     state: item_wall
   product: BoxInflatable
-  container:
-    entity: WrappedParcel
-    containerId: contents
+  container: CrateSteel
   cost: 500
   category: cargoproduct-category-name-emergency
   group: market
