@@ -61,6 +61,7 @@ namespace Content.Client.Cargo.BUI
             _menu = new CargoConsoleMenu(Owner, EntMan, dependencies.Resolve<IPrototypeManager>(), spriteSystem);
             var localPlayer = dependencies.Resolve<IPlayerManager>().LocalEntity;
             var description = new FormattedMessage();
+
             string orderRequester;
 
             if (EntMan.EntityExists(localPlayer))

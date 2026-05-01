@@ -103,7 +103,7 @@ namespace Content.Server.Cargo.Systems
 
             _adminLogger.Add(LogType.Action,
                 LogImpact.Low,
-                $"{ToPrettyString(args.User):user} inserted order slip [orderId:{data.OrderId}, products:{adminString}, requester:{data.Requester}, reason:{data.Reason}]");
+                $"{ToPrettyString(args.User):user} inserted order slip [orderId:{data.OrderId}, products:{adminString} requester:{data.Requester}, reason:{data.Reason}]");
             args.Handled = true;
         }
 
@@ -263,7 +263,7 @@ namespace Content.Server.Cargo.Systems
 
             _adminLogger.Add(LogType.Action,
                 LogImpact.Low,
-                $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, products:{adminString}, requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}");
+                $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, products:{adminString} requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}");
             orderDatabase.Orders[component.Account].Remove(order);
             UpdateBankAccount((station.Value, bank), -cost, order.Account);
             UpdateOrders(station.Value);
@@ -438,7 +438,7 @@ namespace Content.Server.Cargo.Systems
 
             _adminLogger.Add(LogType.Action,
                 LogImpact.Low,
-                $"{ToPrettyString(player):user} added order [orderId:{data.OrderId}, products:{adminString}, requester:{data.Requester}, reason:{data.Reason}]");
+                $"{ToPrettyString(player):user} added order [orderId:{data.OrderId}, products:{adminString} requester:{data.Requester}, reason:{data.Reason}]");
 
         }
 
@@ -571,7 +571,7 @@ namespace Content.Server.Cargo.Systems
 
             _adminLogger.Add(LogType.Action,
                 LogImpact.Low,
-                $"AddAndApproveOrder {description} added order [orderId:{order.OrderId}, products:{adminString}, requester:{order.Requester}, reason:{order.Reason}]");
+                $"AddAndApproveOrder {description} added order [orderId:{order.OrderId}, products:{adminString} requester:{order.Requester}, reason:{order.Reason}]");
 
             // Add it to the list
             return TryAddOrder(dbUid, account, order, component) && TryFulfillOrder(stationData, account, order, component).HasValue;
