@@ -9,9 +9,7 @@ using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Shared.Utility;
 using Robust.Shared.Prototypes;
-using System.Linq;
 using static Robust.Client.UserInterface.Controls.BaseButton;
-using System.Text.RegularExpressions;
 
 namespace Content.Client.Cargo.BUI
 {
@@ -88,9 +86,10 @@ namespace Content.Client.Cargo.BUI
                 _product = row.Product;
                 _orderMenu.ProductName.Text = row.ProductName.Text;
                 _orderMenu.PointCost.Text = row.PointCost.Text;
-                _orderMenu.Amount.Value = 1;
                 _orderMenu.Requester.Text = orderRequester;
                 _orderMenu.Reason.Text = "";
+                _orderMenu.Amount.Value = 1;
+
                 _orderMenu.OpenCentered();
                 _orderMenu.SetPositionLast();
             };
@@ -165,6 +164,10 @@ namespace Content.Client.Cargo.BUI
         private bool AddOrder()
         {
             var orderAmt = _orderMenu?.Amount.Value ?? 0;
+            if (orderAmt < 1 || orderAmt > OrderCapacity)
+            {
+                return false;
+            }
             Basket.Add(new CargoOrderItemData(_product?.ID ?? "", orderAmt));
             SendMessage(new CargoConsoleAddOrderMessage(
                 _orderMenu?.Requester.Text ?? "",
