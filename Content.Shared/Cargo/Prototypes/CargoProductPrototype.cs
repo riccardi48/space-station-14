@@ -93,8 +93,10 @@ namespace Content.Shared.Cargo.Prototypes
         public EntProtoId Product { get; private set; } = string.Empty;
 
         /// <summary>
-        /// The entity to spawn and insert the product into. If null, just the product is spawned.
+        /// The prototype of the container to be spawned
         /// </summary>
+        //This prototype might be redundent as the capacity and access can porbably be gotten from the entity Id.
+        // For livestock crates and setting a lower max items than the capaicty this is currently needed
         [DataField]
         public ProtoId<CargoCratePrototype>? Container;
 
@@ -121,19 +123,31 @@ namespace Content.Shared.Cargo.Prototypes
     public sealed partial class CargoCratePrototype : IPrototype
     {
         /// <summary>
-        /// What entity to spawn as the container.
+        /// ID of prototype.
         /// </summary>
         [ViewVariables]
         [IdDataField]
         public string ID { get; private set; } = default!;
 
         [DataField(required: true)]
+        /// <summary>
+        /// What entity to spawn as the container.
+        /// </summary>
         public EntProtoId<ContainerManagerComponent> Entity;
         [DataField(required: true)]
+        /// <summary>
+        /// Component for spawning entities.
+        /// </summary>
         public string ContainerId = string.Empty;
         [DataField(required: true)]
+        /// <summary>
+        /// Max amount of items that can spawn in a container.
+        /// </summary>
         public int MaxItems;
         [DataField]
+        /// <summary>
+        /// Whether or not this container is required for the item to spawn into.
+        /// </summary>
         public bool Required = false;
     }
 }

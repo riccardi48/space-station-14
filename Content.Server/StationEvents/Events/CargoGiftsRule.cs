@@ -63,14 +63,14 @@ public sealed class CargoGiftsRule : StationEventSystem<CargoGiftsRuleComponent>
             component.Gifts.Remove(productId);
         }
         _cargoSystem.AddAndApproveOrder(
-                    station!.Value,
-                    basket,
-                    Loc.GetString(component.Sender),
-                    Loc.GetString(component.Description),
-                    Loc.GetString(component.Dest),
-                    cargoDb,
-                    component.Account,
-                    (station.Value, stationData));
+                station!.Value,
+                basket,
+                Loc.GetString(component.Sender),
+                Loc.GetString(component.Description),
+                Loc.GetString(component.Dest),
+                cargoDb,
+                component.Account,
+                (station.Value, stationData));
         if (component.Gifts.Count == 0)
         {
             // We're done here!
