@@ -328,18 +328,13 @@ namespace Content.Server.Cargo.Systems
         {
             var station = _station.GetOwningStation(uid);
 
-            if (component.Mode == CargoOrderConsoleMode.PrintSlip)
+            if (component.Mode != CargoOrderConsoleMode.DirectOrder)
                 return;
 
             if (!TryGetOrderDatabase(station, out var orderDatabase))
                 return;
 
-            if (!TryComp<StationBankAccountComponent>(station, out var bank))
-                return;
-
-            var targetAccount = component.Mode == CargoOrderConsoleMode.SendToPrimary ? bank.PrimaryAccount : component.Account;
-
-            RemoveOrder(station.Value, targetAccount, args.OrderId, orderDatabase);
+            RemoveOrder(station.Value, component.Account, args.OrderId, orderDatabase);
         }
 
         private void OnAddOrderMessageSlipPrinter(EntityUid uid, CargoOrderConsoleComponent component, CargoConsoleAddOrderMessage args)
