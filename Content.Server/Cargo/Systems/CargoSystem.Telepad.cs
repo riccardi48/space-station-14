@@ -146,7 +146,7 @@ public sealed partial class CargoSystem
         if (!TryGetLinkedConsole(ent, out var console))
             return;
 
-        TryFulfillOrder((station, data), console.Value.Comp.Account, ent.Comp.CurrentOrders, db);
+        TryFulfillOrder((station, data), ent.Comp.CurrentOrders, db);
     }
 
     private void SetEnabled(EntityUid uid, CargoTelepadComponent component, ApcPowerReceiverComponent? receiver = null,

@@ -9,9 +9,6 @@ using Robust.Client.GameObjects;
 using Robust.Client.Player;
 using Robust.Shared.Utility;
 using Robust.Shared.Prototypes;
-using System.Linq;
-using static Robust.Client.UserInterface.Controls.BaseButton;
-using System.Text.RegularExpressions;
 
 namespace Content.Client.Cargo.BUI
 {
@@ -63,6 +60,7 @@ namespace Content.Client.Cargo.BUI
             _menu = new CargoConsoleMenu(Owner, EntMan, dependencies.Resolve<IPrototypeManager>(), spriteSystem);
             var localPlayer = dependencies.Resolve<IPlayerManager>().LocalEntity;
             var description = new FormattedMessage();
+
             string orderRequester;
 
             if (EntMan.EntityExists(localPlayer))
@@ -90,7 +88,6 @@ namespace Content.Client.Cargo.BUI
                 _orderMenu.PointCost.Text = row.PointCost.Text;
                 _orderMenu.Amount.Value = 1;
                 _orderMenu.OpenCentered();
-                _orderMenu.SetPositionLast();
             };
             _menu.Requester.Text = orderRequester;
             _menu.Reason.Text = "";

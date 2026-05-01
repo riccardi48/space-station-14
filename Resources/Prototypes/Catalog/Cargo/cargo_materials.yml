@@ -39,12 +39,14 @@
     state: brass_3
   product: SheetBrass
   container: CrateSteel
-  cost: 1250
+  cost: 1000
   category: cargoproduct-category-name-materials
   group: market
 
 - type: cargoProduct
   id: MaterialPlasteel
+  name: cargoproduct-name-material-plasteel
+  description: cargoproduct-description-material-plasteel
   icon:
     sprite: Objects/Materials/Sheets/metal.rsi
     state: plasteel_3
@@ -56,6 +58,8 @@
 
 - type: cargoProduct
   id: MaterialGold
+  name: cargoproduct-name-material-gold
+  description: cargoproduct-description-material-gold
   icon:
     sprite: Objects/Materials/ingots.rsi
     state: gold_3
@@ -67,6 +71,8 @@
 
 - type: cargoProduct
   id: MaterialSilver
+  name: cargoproduct-name-material-silver
+  description: cargoproduct-description-material-silver
   icon:
     sprite: Objects/Materials/ingots.rsi
     state: silver_3

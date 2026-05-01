@@ -9,31 +9,39 @@ namespace Content.Shared.Cargo
     {
 
         /// <summary>
-        /// The ID of the cargo product ordered.
+        /// The ID of the cargo crate of the container.
         /// </summary>
         [DataField]
         public string Container;
-
-        [DataField]
+        /// <summary>
+        /// The ID of the component which entities are inserted
+        /// </summary>
         public string ContainerID = string.Empty;
-
+        /// <summary>
+        /// The max amount of items which can be spawned inside this container
+        /// </summary>
         [DataField]
         public int MaxItems;
-
         /// <summary>
-        /// The number of items in the order. Not readonly, as it might change
-        /// due to caps on the amount of orders that can be placed.
+        /// The list of items which will be spawn in this container
         /// </summary>
         [DataField]
         public List<CargoOrderItemData> Products = new();
-
-        [DataField]
+        /// <summary>
+        /// String to be added to the label of this container
+        /// </summary>
         public string LableMessage = string.Empty;
-        [DataField]
+        /// <summary>
+        /// String of the name of the label of this container
+        /// </summary>
         public string LableName = string.Empty;
-        [DataField]
+        /// <summary>
+        /// Whether or not this container represents a single spawn and will not spawn as a container
+        /// </summary>
         public bool IsSingleProduct = false;
-        [DataField]
+        /// <summary>
+        /// Wheter or not the items must spawn in a crate an will not spawn in a parcel
+        /// </summary>
         public bool CrateRequired = false;
         public CargoOrderContainerData(string container, string containerID, CargoOrderItemData? item = null, bool crateRequired = false, int maxItems = 30)
         {
@@ -41,12 +49,12 @@ namespace Content.Shared.Cargo
             ContainerID = containerID;
             CrateRequired = crateRequired;
             MaxItems = maxItems;
-            if (item == null)
+            // Item should only be null if only item in container and will not be spawned in a container
+            if (item != null)
             {
-                return;
+                Products.Add(item);
+                IsSingleProduct = true;
             }
-            Products.Add(item);
-            IsSingleProduct = true;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Content.Shared.Cargo.Components;
 public sealed partial class CargoSlipComponent : Component
 {
     /// <summary>
-    /// The requested product
+    /// List of items requested in this slip.
     /// </summary>
     [DataField]
     public List<CargoOrderItemData> Basket;

@@ -14,7 +14,7 @@ namespace Content.Shared.Cargo
         public int OrderId { get; private set; }
 
         /// <summary>
-        /// The ID of the cargo product ordered.
+        /// List of items included in this order.
         /// </summary>
         [DataField]
         public List<CargoOrderItemData> Basket;
