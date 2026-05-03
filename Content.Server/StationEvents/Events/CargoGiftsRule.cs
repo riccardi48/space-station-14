@@ -54,14 +54,7 @@ public sealed class CargoGiftsRule : StationEventSystem<CargoGiftsRuleComponent>
 
         // Add some presents
         var outstanding = _cargoSystem.GetOutstandingOrderCount((station.Value, cargoDb), component.Account);
-        List<CargoOrderItemData> basket = new();
-        while (outstanding < cargoDb.Capacity - component.OrderSpaceToLeave && component.Gifts.Count > 0)
-        {
-            // I wish there was a nice way to pop this
-            var (productId, qty) = component.Gifts.First();
-            basket.Add(new CargoOrderItemData(productId, qty));
-            component.Gifts.Remove(productId);
-        }
+        List<CargoOrderItemData> basket = component.Gifts.Select(x => new CargoOrderItemData(x.Key, x.Value)).ToList();
         _cargoSystem.AddAndApproveOrder(
                 station!.Value,
                 basket,

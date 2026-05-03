@@ -415,20 +415,16 @@ namespace Content.Server.Cargo.Systems
                 var tradePads = GetCargoPallets(trade, BuySellType.Buy);
                 _random.Shuffle(tradePads);
 
-                var freePads = GetFreeCargoPallets(trade, tradePads);
-                if (freePads.Count >= containers.Count) //check if the station has enough free pallets
+                foreach (var pad in GetFreeCargoPallets(trade, tradePads))
                 {
-                    foreach (var pad in freePads)
-                    {
-                        var coordinates = new EntityCoordinates(trade, pad.Transform.LocalPosition);
+                    var coordinates = new EntityCoordinates(trade, pad.Transform.LocalPosition);
 
-                        if (FulfillOrder(containers[0], coordinates, orderDatabase.PrinterOutput))
-                        {
-                            tradeDestination = trade;
-                            containers.RemoveAt(0);
-                            if (containers.Count <= 0) //Spawn a crate on free pellets until the order is fulfilled.
-                                break;
-                        }
+                    if (FulfillOrder(containers[0], coordinates, orderDatabase.PrinterOutput))
+                    {
+                        tradeDestination = trade;
+                        containers.RemoveAt(0);
+                        if (containers.Count <= 0) //Spawn a crate on free pellets until the order is fulfilled.
+                            break;
                     }
                 }
 
@@ -578,7 +574,7 @@ namespace Content.Server.Cargo.Systems
 
                 if (!item.WithContainer || productProto.Container == null)
                 {
-                    for (int i = 0; i < item.Quantity; i++)
+                    for (int i = 0; i < item.Quantity - item.NumOrdered; i++)
                     {
                         containers.Add(new CargoOrderContainerData("", "", item));
                     }
