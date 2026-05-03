@@ -1,16 +1,5 @@
 - type: entity
   parent: CrateLivestock
-  id: CrateNPCCat
-  name: cat crate
-  description: A crate containing a single cat.
-  components:
-  - type: EntityTableContainerFill
-    containers:
-      entity_storage: !type:GroupSelector
-        children:
-        - id: MobCat
-        - id: MobCatCalico- type: entity
-  parent: CrateLivestock
   id: CrateNPCBee
   name: crate of bees
   description: A crate containing a swarm of eight bees.
@@ -295,38 +284,3 @@
       entity_storage:
         id: MobMothroach
         amount: 4
-
-        - id: MobCatCaracal
-          weight: 0.5
-        - id: MobCatKitten
-          weight: 0.25
-        - id: MobBingus
-          weight: 0.005
-
-- type: entity
-  parent: CrateLivestock
-  id: CrateNPCDuck
-  name: duck crate
-  description: A crate containing six fully grown ducks.
-  components:
-  - type: EntityTableContainerFill
-    containers:
-      entity_storage: !type:AllSelector
-        children:
-        - id: MobDuckMallard
-        - id: MobDuckBrown
-        - id: MobDuckWhite
-          amount: 2
-
-- type: entity
-  parent: CrateRodentCage
-  id: CrateNPCHamlet
-  suffix: Hamlet
-  components:
-  - type: EntityTableContainerFill
-    containers:
-      entity_storage: !type:GroupSelector
-        children:
-          - id: MobHamsterHamlet
-          - id: MobHamsterHamletSlippery
-            weight: 0.001
