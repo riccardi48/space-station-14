@@ -56,12 +56,11 @@
             <BoxContainer Orientation="Horizontal"
                         HorizontalExpand="True">
                 <Control MinWidth="5" />
-                <Label Name="Description"
+                <RichTextLabel Name="Description"
                         Access="Public"
                         HorizontalExpand="True"
                         VerticalExpand="True"
-                        StyleClasses="LabelSubText"
-                        ClipText="True" />
+                        StyleClasses="LabelSubText" />
             </BoxContainer>
         </BoxContainer>
     </BoxContainer>
