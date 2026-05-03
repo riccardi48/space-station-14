@@ -26,6 +26,7 @@ namespace Content.Shared.Cargo
         [DataField]
         public string Reason { get; private set; }
         public bool Approved;
+        public bool Assigned;
         [DataField]
         public string? Approver;
 

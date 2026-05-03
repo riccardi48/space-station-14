@@ -42,12 +42,13 @@ public sealed partial class CargoSystem
 
             // todo cannot be fucking asked to figure out device linking rn but this shouldn't just default to the first port.
             if (!TryGetLinkedConsole((uid, tele), out var console) ||
-                console.Value.Owner != args.OrderConsole.Owner)
+                console.Value.Comp.Mode != CargoOrderConsoleMode.DirectOrder)
                 continue;
-            var containers = SortOrders(args.Order);
+            var containers = PackOrderIntoContainers(args.Order);
+            tele.CurrentOrders.Add(args.Order);
             for (var i = 0; i < containers.Count; i++)
             {
-                tele.CurrentOrders.Add(containers[i]);
+                tele.CurrentContainers.Add(containers[i]);
             }
             tele.Accumulator = tele.Delay;
             args.Handled = true;
@@ -104,7 +105,8 @@ public sealed partial class CargoSystem
                 continue;
             }
 
-            var currentOrder = comp.CurrentOrders.First();
+            comp.CurrentOrders.RemoveAll(order => order.Basket.Count(item => item.NumOrdered == item.Quantity) == 0);
+            var currentOrder = comp.CurrentContainers.First();
             if (FulfillOrder(currentOrder, xform.Coordinates, comp.PrinterOutput))
             {
                 _audio.PlayPvs(_audio.ResolveSound(comp.TeleportSound), uid, AudioParams.Default.WithVolume(-8f));
@@ -112,7 +114,7 @@ public sealed partial class CargoSystem
                 if (_station.GetOwningStation(uid) is { } station)
                     UpdateOrders(station);
 
-                comp.CurrentOrders.Remove(currentOrder);
+                comp.CurrentContainers.Remove(currentOrder);
                 comp.CurrentState = CargoTelepadState.Teleporting;
                 _appearance.SetData(uid, CargoTelepadVisuals.State, CargoTelepadState.Teleporting, appearance);
             }
@@ -146,7 +148,10 @@ public sealed partial class CargoSystem
         if (!TryGetLinkedConsole(ent, out var console))
             return;
 
-        TryFulfillOrder((station, data), ent.Comp.CurrentOrders, db);
+        foreach (var order in ent.Comp.CurrentOrders)
+        {
+            order.Assigned = false;
+        }
     }
 
     private void SetEnabled(EntityUid uid, CargoTelepadComponent component, ApcPowerReceiverComponent? receiver = null,

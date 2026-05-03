@@ -27,7 +27,6 @@ namespace Content.Shared.Cargo
         /// Whether or not this item should be ordered with the rest of the basket.
         /// </summary>
         // Currently unused
-        [DataField]
         public bool ToBeOrdered = true;
         /// <summary>
         /// Tracks the number of spawned items out of the total quantity.

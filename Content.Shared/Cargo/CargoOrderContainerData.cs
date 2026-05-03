@@ -30,11 +30,13 @@ namespace Content.Shared.Cargo
         /// <summary>
         /// String to be added to the label of this container
         /// </summary>
-        public string LableMessage = string.Empty;
+        [DataField]
+        public string LabelMessage = string.Empty;
         /// <summary>
         /// String of the name of the label of this container
         /// </summary>
-        public string LableName = string.Empty;
+        [DataField]
+        public string LabelName = string.Empty;
         /// <summary>
         /// Whether or not this container represents a single spawn and will not spawn as a container
         /// </summary>
