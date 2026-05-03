@@ -99,22 +99,22 @@ public sealed partial class CargoSystem
                 continue;
             }
 
-            if (comp.CurrentOrders.Count == 0 || !TryGetLinkedConsole((uid, comp), out var console))
+            if (comp.CurrentContainers.Count == 0 || !TryGetLinkedConsole((uid, comp), out var console))
             {
                 comp.Accumulator += comp.Delay;
                 continue;
             }
 
             comp.CurrentOrders.RemoveAll(order => order.Basket.Count(item => item.NumOrdered == item.Quantity) == 0);
-            var currentOrder = comp.CurrentContainers.First();
-            if (FulfillOrder(currentOrder, xform.Coordinates, comp.PrinterOutput))
+            var currentContainer = comp.CurrentContainers.First();
+            if (FulfillOrder(currentContainer, xform.Coordinates, comp.PrinterOutput))
             {
                 _audio.PlayPvs(_audio.ResolveSound(comp.TeleportSound), uid, AudioParams.Default.WithVolume(-8f));
 
                 if (_station.GetOwningStation(uid) is { } station)
                     UpdateOrders(station);
 
-                comp.CurrentContainers.Remove(currentOrder);
+                comp.CurrentContainers.Remove(currentContainer);
                 comp.CurrentState = CargoTelepadState.Teleporting;
                 _appearance.SetData(uid, CargoTelepadVisuals.State, CargoTelepadState.Teleporting, appearance);
             }

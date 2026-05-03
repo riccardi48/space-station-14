@@ -160,29 +160,36 @@ namespace Content.Server.Cargo.Systems
 
         private void UpdateUndeliveredOrders(Entity<StationCargoOrderDatabaseComponent> ent)
         {
-            var stationQuery = EntityQueryEnumerator<StationDataComponent, StationCargoOrderDatabaseComponent>();
-            while (stationQuery.MoveNext(out var uid, out var stationData, out var orderDatabase))
+            if (!TryComp<StationDataComponent>(ent, out var stationData))
+                return;
+
+            var toDeliver = new List<CargoOrderData>();
+
+            foreach (var order in ent.Comp.Orders.Where(order => order.Approved))
             {
-                foreach (var order in ent.Comp.Orders.Where(order => !order.Approved && !order.Assigned))
+                if (!order.Basket.Any(item => item.NumOrdered != item.Quantity))
                 {
-                    if (order.Basket.Count(item => item.NumOrdered == item.Quantity) == 0)
-                    {
-                        DeliveredOrder(uid, order, orderDatabase);
-                        continue;
-                    }
-                    if (order.Assigned)
-                        continue;
-                    var ev = new FulfillCargoOrderEvent((uid, stationData), order);
-                    RaiseLocalEvent(ref ev);
-                    if (ev.Handled)
-                    {
-                        order.Assigned = true;
-                        continue;
-                    }
-                    if (TryFulfillOrder((uid, stationData), order, orderDatabase))
-                        DeliveredOrder(uid, order, orderDatabase);
+                    toDeliver.Add(order);
+                    continue;
                 }
+
+                if (order.Assigned)
+                    continue;
+
+                var ev = new FulfillCargoOrderEvent((ent, stationData), order);
+                RaiseLocalEvent(ref ev);
+                if (ev.Handled)
+                {
+                    order.Assigned = true;
+                    continue;
+                }
+
+                if (TryFulfillOrder((ent, stationData), order, ent.Comp))
+                    toDeliver.Add(order);
             }
+
+            foreach (var order in toDeliver)
+                DeliveredOrder(ent, order, ent.Comp);
         }
 
         private void OnAddOrderMessage(EntityUid uid, CargoOrderConsoleComponent component, CargoConsoleAddOrderMessage args)
@@ -322,6 +329,7 @@ namespace Content.Server.Cargo.Systems
                 $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, products:{adminString} requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}");
             UpdateBankAccount((station.Value, bank), -cost, order.Account);
             UpdateOrders(station.Value);
+            UpdateUndeliveredOrders((station.Value, orderDatabase));
         }
 
         private string GetApprovedRadioMessage(CargoOrderData order)
@@ -559,8 +567,9 @@ namespace Content.Server.Cargo.Systems
         {
             var containers = new List<CargoOrderContainerData>();
 
-            foreach (var item in order.Basket)
+            for (int j = 0; j < order.Basket.Count(); j++)
             {
+                var item = order.Basket[j];
                 if (!ShouldOrderItem(item))
                     continue;
 
@@ -569,14 +578,18 @@ namespace Content.Server.Cargo.Systems
 
                 if (!item.WithContainer || productProto.Container == null)
                 {
-                    containers.Add(new CargoOrderContainerData("", "", item));
+                    for (int i = 0; i < item.Quantity; i++)
+                    {
+                        containers.Add(new CargoOrderContainerData("", "", item));
+                    }
                     continue;
                 }
 
                 if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
                     continue;
 
-                PackItemIntoCrates(item, crate, containers);
+                PackItemIntoCrates(ref item, crate, containers);
+                order.Basket[j] = item;
             }
 
             ApplyLabelsAndWrapSingletons(containers, order);
@@ -588,8 +601,8 @@ namespace Content.Server.Cargo.Systems
             return item.ToBeOrdered && item.NumOrdered < item.Quantity;
         }
 
-        private void PackItemIntoCrates(
-            CargoOrderItemData item,
+        private static void PackItemIntoCrates(
+            ref CargoOrderItemData item,
             CargoCratePrototype crate,
             List<CargoOrderContainerData> containers)
         {
@@ -624,7 +637,7 @@ namespace Content.Server.Cargo.Systems
             }
         }
 
-        private bool CanFitInContainer(
+        private static bool CanFitInContainer(
             CargoOrderContainerData container,
             CargoOrderItemData item,
             CargoCratePrototype crate)
@@ -666,7 +679,7 @@ namespace Content.Server.Cargo.Systems
         /// <summary>
         /// Count the number of items which will be spawned in a container
         /// </summary>
-        private int GetContainerItemCount(CargoOrderContainerData container)
+        private static int GetContainerItemCount(CargoOrderContainerData container)
         {
             return container.Products.Sum(item => item.Quantity);
         }
