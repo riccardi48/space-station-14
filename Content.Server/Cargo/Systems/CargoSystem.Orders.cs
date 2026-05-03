@@ -544,7 +544,7 @@ namespace Content.Server.Cargo.Systems
             var printed = Spawn(paperProto, spawn);
             if (TryComp<PaperComponent>(printed, out var paper))
             {
-                _metaSystem.SetEntityName(printed, container.LabelMessage);
+                _metaSystem.SetEntityName(printed, container.LabelName);
 
                 _paperSystem.SetContent((printed, paper), container.LabelMessage);
 

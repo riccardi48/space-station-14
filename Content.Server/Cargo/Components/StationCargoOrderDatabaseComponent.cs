@@ -55,7 +55,7 @@ public sealed partial class StationCargoOrderDatabaseComponent : Component
     [DataField]
     public EntProtoId PrinterOutput = "PaperCargoInvoice";
     [DataField]
-    public TimeSpan OrderCheckDelay = TimeSpan.FromSeconds(30);
+    public TimeSpan OrderCheckDelay = TimeSpan.FromSeconds(10);
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
     public TimeSpan NextOrderCheck;
 }
