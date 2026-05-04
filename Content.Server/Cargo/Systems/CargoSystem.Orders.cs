@@ -511,7 +511,7 @@ namespace Content.Server.Cargo.Systems
             {
                 if (!_protoMan.TryIndex<CargoProductPrototype>(container.Products.First().Product, out var singleProto))
                     return false;
-                containerEntity = Spawn(singleProto.Product, spawn);
+                containerEntity = Spawn(singleProto.SpawnList.First(), spawn);
                 container.Products.First().NumOrdered += 1;
             }
             else
@@ -529,12 +529,15 @@ namespace Content.Server.Cargo.Systems
                         return false;
                     for (int i = 0; i < item.Quantity; i++)
                     {
-                        var itemEntity = Spawn(productProto.Product, spawn);
+                        foreach (var product in productProto.SpawnList)
+                        {
+                            var itemEntity = Spawn(product, spawn);
                         if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
                             !_container.Insert(itemEntity, container1, force: true))
                         {
                             DebugTools.Assert(
                                 $"Failed to insert cargo product into its specified container. This indicates an error in the cargo product definition's YAML as the product should be insertable into its container. {productProto.Name}: {(EntProtoId)container.Container}");
+                            }
                         }
                         item.NumOrdered++;
                     }

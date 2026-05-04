@@ -1,3 +1,4 @@
+using System.Linq;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
@@ -47,7 +48,7 @@ namespace Content.Shared.Cargo.Prototypes
                 {
                     _name = Loc.GetString(nameLoc);
                 }
-                else if (IoCManager.Resolve<IPrototypeManager>().Resolve(Product, out var prototype))
+                else if (IoCManager.Resolve<IPrototypeManager>().Resolve(SpawnList.First(), out var prototype))
                 {
                     _name = prototype.Name;
                 }
@@ -71,7 +72,7 @@ namespace Content.Shared.Cargo.Prototypes
                 {
                     _description = Loc.GetString(descLoc);
                 }
-                else if (IoCManager.Resolve<IPrototypeManager>().Resolve(Product, out var prototype))
+                else if (IoCManager.Resolve<IPrototypeManager>().Resolve(SpawnList.First(), out var prototype))
                 {
                     _description = prototype.Description;
                 }
@@ -93,10 +94,21 @@ namespace Content.Shared.Cargo.Prototypes
         public EntProtoId Product { get; private set; } = string.Empty;
 
         /// <summary>
+        ///     List of entity prototypes to spawn. If not set, falls back to <see cref="Product"/>.
+        /// </summary>
+        [DataField]
+        public List<EntProtoId>? Products { get; private set; }
+
+        /// <summary>
+        ///     Resolved list of entities to spawn. Always use this instead of <see cref="Product"/> directly.
+        /// </summary>
+        public List<EntProtoId> SpawnList => Products ?? new List<EntProtoId> { Product };
+
+        /// <summary>
         /// The prototype of the container to be spawned
         /// </summary>
-        //This prototype might be redundent as the capacity and access can porbably be gotten from the entity Id.
-        // For livestock crates and setting a lower max items than the capaicty this is currently needed
+        // This prototype might be redundent as the capacity and access can porbably be gotten from the entity Id.
+        // For livestock crates and setting a lower max items than the capaicty this is currently useful
         [DataField]
         public ProtoId<CargoCratePrototype>? Container;
 
