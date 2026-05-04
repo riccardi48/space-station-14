@@ -598,7 +598,7 @@ namespace Content.Server.Cargo.Systems
         private bool ShouldWrapAsParcel(CargoOrderContainerData container)
         {
             return !container.IsSingleProduct
-                && GetContainerItemCount(container, totalEntities: true) == 1
+                && GetContainerItemCount(container) == 1
                 && !container.CrateRequired;
         }
         /// <summary>

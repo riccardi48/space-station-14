@@ -282,7 +282,7 @@ public abstract class SharedCargoSystem : EntitySystem
         CargoCratePrototype crate,
         List<CargoOrderContainerData> containers)
     {
-        var remaining = item.Quantity - item.NumOrdered;
+        var remaining = GetItemEntityCount(item) * (item.Quantity - item.NumOrdered);
 
         // Try to fit into an existing container with space
         foreach (var container in containers)
@@ -301,7 +301,7 @@ public abstract class SharedCargoSystem : EntitySystem
         // Overflow into new containers
         while (remaining > 0)
         {
-            var batch = Math.Min(remaining, crate.MaxItems);
+            var batch = Math.Min(remaining, crate.MaxItems) / GetItemEntityCount(item);
             var container = new CargoOrderContainerData(
                 crate.Entity,
                 crate.ContainerId,
@@ -310,7 +310,7 @@ public abstract class SharedCargoSystem : EntitySystem
                 cost: crate.Cost);
             container.Products.Add(item with { Quantity = batch });
             containers.Add(container);
-            remaining -= batch;
+            remaining -= batch * GetItemEntityCount(item);
         }
     }
 
@@ -319,25 +319,27 @@ public abstract class SharedCargoSystem : EntitySystem
         CargoOrderItemData item,
         CargoCratePrototype crate)
     {
+        if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var proto))
+            return false;
         return container.Container != ""
             && (EntProtoId)container.Container == crate.Entity
-            && GetContainerItemCount(container, totalEntities: true) <= container.MaxItems - item.Quantity
+            && GetContainerItemCount(container) <= container.MaxItems - item.Quantity * GetItemEntityCount(item)
             && container.CrateRequired == crate.Required;
     }
 
-    public int GetContainerItemCount(CargoOrderContainerData container, bool totalEntities = false)
+    public int GetContainerItemCount(CargoOrderContainerData container)
     {
-        return container.Products.Sum(item =>
-            {
-                if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var proto))
-                {
-                    return 1;
-                }
-                return item.Quantity * (totalEntities ? proto.SpawnList.Count() : 1);
-            }
-            );
+        return container.Products.Sum(item => item.Quantity * GetItemEntityCount(item));
     }
 
+    public int GetItemEntityCount(CargoOrderItemData item)
+    {
+        if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var proto))
+        {
+            return 1;
+        }
+        return proto.SpawnList.Count();
+    }
 
 }
 
