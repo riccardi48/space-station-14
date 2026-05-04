@@ -293,9 +293,9 @@ public abstract class SharedCargoSystem : EntitySystem
             if (!CanFitInContainer(container, item, crate))
                 continue;
 
-            var fitting = Math.Min(remaining, container.MaxItems - GetContainerItemCount(container));
+            var fitting = Math.Min(remaining, container.MaxItems - GetContainerItemCount(container)) / GetItemEntityCount(item);
             container.Products.Add(item with { Quantity = fitting });
-            remaining -= fitting;
+            remaining -= fitting * GetItemEntityCount(item);
         }
 
         // Overflow into new containers
