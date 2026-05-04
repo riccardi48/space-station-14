@@ -6,7 +6,7 @@
   products:
     - ClothingOuterSuitBomb
     - ClothingHeadHelmetBombSuit
-  container: CrateSecGear
+  container: CrateSecgear
   cost: 700
   category: cargoproduct-category-name-emergency
   group: market

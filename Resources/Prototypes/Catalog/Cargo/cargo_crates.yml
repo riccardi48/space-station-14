@@ -28,7 +28,7 @@
   cost: 100
 
 - type: cargoCrate
-  id: CrateSecGear
+  id: CrateSecgear
   entity: CrateSecgear
   containerId: entity_storage
   required: true
