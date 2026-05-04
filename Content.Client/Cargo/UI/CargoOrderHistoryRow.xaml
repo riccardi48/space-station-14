@@ -48,7 +48,7 @@
                     Access="Public"
                     HorizontalAlignment="Right"
                     Align="Right" />
-                <Control MinWidth="30" />
+                <Control MinWidth="15" />
             </BoxContainer>
             <BoxContainer Orientation="Horizontal"
                         HorizontalExpand="True">

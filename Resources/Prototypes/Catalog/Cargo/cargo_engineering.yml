@@ -98,11 +98,11 @@
 - type: cargoProduct
   id: EvaKit
   icon:
-    sprite: Clothing/Head/Helmets/eva.rsi
+    sprite: Clothing/OuterClothing/Suits/eva.rsi
     state: icon
   products:
-  - ClothingHeadHelmetEVA
   - ClothingOuterHardsuitEVA
+  - ClothingHeadHelmetEVA
   container: CrateCommandSecure
   cost: 2500
   category: cargoproduct-category-name-engineering
