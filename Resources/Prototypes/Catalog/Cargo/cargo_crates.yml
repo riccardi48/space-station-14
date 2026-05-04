@@ -3,18 +3,21 @@
   entity: CrateGenericSteel
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: CratePlastic
   entity: CratePlastic
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: WrappedParcel
   entity: WrappedParcel
   containerId: contents
   maxItems: 1
+  cost: 20
 
 - type: cargoCrate
   id: CratePlasma
@@ -22,6 +25,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateSecGear
@@ -29,6 +33,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateSecureScience
@@ -36,6 +41,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateFreezer
@@ -43,48 +49,56 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 80
 
 - type: cargoCrate
   id: CrateHydroponics
   entity: CrateHydroponics
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: CrateMedical
   entity: CrateMedical
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: CrateRadiation
   entity: CrateRadiation
   containerId: entity_storage
   maxItems: 30
+  cost: 80
 
 - type: cargoCrate
   id: CrateInternals
   entity: CrateInternals
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: CrateElectrical
   entity: CrateElectrical
   containerId: entity_storage
   maxItems: 30
+  cost: 50
 
 - type: cargoCrate
   id: CrateEngineering
   entity: CrateEngineering
   containerId: entity_storage
   maxItems: 30
+  cost: 60
 
 - type: cargoCrate
   id: CrateScience
   entity: CrateScience
   containerId: entity_storage
   maxItems: 30
+  cost: 60
 
 - type: cargoCrate
   id: CrateEngineeringSecure
@@ -92,6 +106,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateMedicalSecure
@@ -99,6 +114,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateChemistrySecure
@@ -106,6 +122,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateScienceSecure
@@ -113,6 +130,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateHydroSecure
@@ -120,6 +138,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateWeaponSecure
@@ -127,6 +146,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateCommandSecure
@@ -134,6 +154,7 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100
 
 - type: cargoCrate
   id: CrateLivestock
@@ -141,3 +162,4 @@
   containerId: entity_storage
   required: true
   maxItems: 30
+  cost: 100

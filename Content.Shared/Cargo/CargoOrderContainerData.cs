@@ -45,12 +45,14 @@ namespace Content.Shared.Cargo
         /// Wheter or not the items must spawn in a crate an will not spawn in a parcel
         /// </summary>
         public bool CrateRequired = false;
-        public CargoOrderContainerData(string container, string containerID, CargoOrderItemData? item = null, bool crateRequired = false, int maxItems = 30)
+        public int Cost;
+        public CargoOrderContainerData(string container, string containerID, CargoOrderItemData? item = null, bool crateRequired = false, int maxItems = 30, int cost = 0)
         {
             Container = container;
             ContainerID = containerID;
             CrateRequired = crateRequired;
             MaxItems = maxItems;
+            Cost = cost;
             // Item should only be null if only item in container and will not be spawned in a container
             if (item != null)
             {

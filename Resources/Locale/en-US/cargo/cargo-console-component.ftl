@@ -40,6 +40,7 @@ cargo-console-menu-account-action-option-withdraw = Withdraw Cash
 cargo-console-menu-account-action-option-transfer = Transfer Funds to {$code}
 cargo-console-menu-cart-label = Cart
 cargo-console-menu-cart-submit = Submit
+cargo-console-menu-cart-container-cost-label = Crates Cost
 cargo-console-menu-cart-total-label = Total Cost
 cargo-console-menu-orders-history-label = History
 

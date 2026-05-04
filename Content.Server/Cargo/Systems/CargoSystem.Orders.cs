@@ -289,7 +289,7 @@ namespace Content.Server.Cargo.Systems
                 return;
             }
 
-            var cost = GetBasketCost(order.Basket);
+            var cost = GetBasketTotalCost(order.Basket);
             var accountBalance = GetBalanceFromAccount((station.Value, bank), order.Account);
 
             // Not enough balance
@@ -346,7 +346,7 @@ namespace Content.Server.Cargo.Systems
             }
             message += Loc.GetString("cargo-console-unlock-approved-order-broadcast-footer",
                 ("approver", order.Approver ?? string.Empty),
-                ("cost", GetBasketCost(order.Basket)));
+                ("cost", GetBasketTotalCost(order.Basket)));
             return message;
         }
 
@@ -532,11 +532,11 @@ namespace Content.Server.Cargo.Systems
                         foreach (var product in productProto.SpawnList)
                         {
                             var itemEntity = Spawn(product, spawn);
-                        if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
-                            !_container.Insert(itemEntity, container1, force: true))
-                        {
-                            DebugTools.Assert(
-                                $"Failed to insert cargo product into its specified container. This indicates an error in the cargo product definition's YAML as the product should be insertable into its container. {productProto.Name}: {(EntProtoId)container.Container}");
+                            if (!_container.TryGetContainer(containerEntity, container.ContainerID, out var container1) ||
+                                !_container.Insert(itemEntity, container1, force: true))
+                            {
+                                DebugTools.Assert(
+                                    $"Failed to insert cargo product into its specified container. This indicates an error in the cargo product definition's YAML as the product should be insertable into its container. {productProto.Name}: {(EntProtoId)container.Container}");
                             }
                         }
                         item.NumOrdered++;
@@ -564,88 +564,14 @@ namespace Content.Server.Cargo.Systems
         /// </summary>
         private List<CargoOrderContainerData> PackOrderIntoContainers(CargoOrderData order)
         {
-            var containers = new List<CargoOrderContainerData>();
-
-            for (int j = 0; j < order.Basket.Count(); j++)
-            {
-                var item = order.Basket[j];
-                if (!ShouldOrderItem(item))
-                    continue;
-
-                if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var productProto))
-                    continue;
-
-                if (!item.WithContainer || productProto.Container == null)
-                {
-                    for (int i = 0; i < item.Quantity - item.NumOrdered; i++)
-                    {
-                        containers.Add(new CargoOrderContainerData("", "", item));
-                    }
-                    continue;
-                }
-
-                if (!_protoMan.TryIndex<CargoCratePrototype>(productProto.Container, out var crate))
-                    continue;
-
-                PackItemIntoCrates(ref item, crate, containers);
-                order.Basket[j] = item;
-            }
+            var containers = PackBasketIntoContainers(ref order.Basket);
 
             ApplyLabelsAndWrapSingletons(containers, order);
             return containers;
         }
 
-        private bool ShouldOrderItem(CargoOrderItemData item)
-        {
-            return item.ToBeOrdered && item.NumOrdered < item.Quantity;
-        }
 
-        private static void PackItemIntoCrates(
-            ref CargoOrderItemData item,
-            CargoCratePrototype crate,
-            List<CargoOrderContainerData> containers)
-        {
-            var remaining = item.Quantity - item.NumOrdered;
 
-            // Try to fit into an existing container with space
-            foreach (var container in containers)
-            {
-                if (remaining <= 0)
-                    break;
-
-                if (!CanFitInContainer(container, item, crate))
-                    continue;
-
-                var fitting = Math.Min(remaining, container.MaxItems - GetContainerItemCount(container));
-                container.Products.Add(item with { Quantity = fitting });
-                remaining -= fitting;
-            }
-
-            // Overflow into new containers
-            while (remaining > 0)
-            {
-                var batch = Math.Min(remaining, crate.MaxItems);
-                var container = new CargoOrderContainerData(
-                    crate.Entity,
-                    crate.ContainerId,
-                    crateRequired: crate.Required,
-                    maxItems: crate.MaxItems);
-                container.Products.Add(item with { Quantity = batch });
-                containers.Add(container);
-                remaining -= batch;
-            }
-        }
-
-        private static bool CanFitInContainer(
-            CargoOrderContainerData container,
-            CargoOrderItemData item,
-            CargoCratePrototype crate)
-        {
-            return container.Container != ""
-                && (EntProtoId)container.Container == crate.Entity
-                && GetContainerItemCount(container) <= container.MaxItems - item.Quantity
-                && container.CrateRequired == crate.Required;
-        }
 
         private void ApplyLabelsAndWrapSingletons(
             List<CargoOrderContainerData> containers,
@@ -678,10 +604,6 @@ namespace Content.Server.Cargo.Systems
         /// <summary>
         /// Count the number of items which will be spawned in a container
         /// </summary>
-        private static int GetContainerItemCount(CargoOrderContainerData container)
-        {
-            return container.Products.Sum(item => item.Quantity);
-        }
         /// <summary>
         /// Create the string which will go on the label of the container
         /// </summary>
@@ -743,14 +665,6 @@ namespace Content.Server.Cargo.Systems
         /// <summary>
         /// Get the total cost of an order's basket
         /// </summary>
-        public int GetBasketCost(List<CargoOrderItemData> basket)
-        {
-            return basket.Sum(item =>
-            {
-                var proto = _protoMan.Index<CargoProductPrototype>(item.Product);
-                return proto.Cost * item.Quantity;
-            });
-        }
 
         public bool IsInAvalibleProducts(Entity<CargoOrderConsoleComponent> ent, List<CargoOrderItemData> basket)
         {

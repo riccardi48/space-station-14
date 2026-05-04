@@ -39,6 +39,20 @@
             <BoxContainer Orientation="Horizontal"
                         HorizontalExpand="True">
                 <Control MinWidth="5" />
+                <Label Text ="{Loc 'cargo-console-menu-cart-container-cost-label'}"
+                    Access="Public"
+                    HorizontalAlignment="Left" />
+                <Control HorizontalExpand="True" />
+                <Label Name="ContainerCost"
+                    Text = "0"
+                    Access="Public"
+                    HorizontalAlignment="Right"
+                    Align="Right" />
+                <Control MinWidth="30" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal"
+                        HorizontalExpand="True">
+                <Control MinWidth="5" />
                 <Label Text ="{Loc 'cargo-console-menu-cart-total-label'}"
                     Access="Public"
                     HorizontalAlignment="Left" />

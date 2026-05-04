@@ -161,5 +161,10 @@ namespace Content.Shared.Cargo.Prototypes
         /// Whether or not this container is required for the item to spawn into.
         /// </summary>
         public bool Required = false;
+        [DataField]
+        /// <summary>
+        /// Whether or not this container is required for the item to spawn into.
+        /// </summary>
+        public int Cost;
     }
 }

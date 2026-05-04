@@ -239,7 +239,12 @@ namespace Content.Client.Cargo.UI
 
                     BasketTotal =
                     {
-                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", GetBasketTotal(order.Basket).ToString())),
+                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetBasketTotalCost(order.Basket).ToString())),
+                    },
+
+                    ContainerCost =
+                    {
+                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetContainersCost(_cargoSystem.PackBasketIntoContainers(ref order.Basket)).ToString())),
                     },
                 };
                 foreach (var item in order.Basket)
@@ -329,7 +334,12 @@ namespace Content.Client.Cargo.UI
 
                     BasketTotal =
                     {
-                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", GetBasketTotal(order.Basket).ToString())),
+                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetBasketTotalCost(order.Basket).ToString())),
+                    },
+
+                    ContainerCost =
+                    {
+                        Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetContainersCost(_cargoSystem.PackBasketIntoContainers(ref order.Basket)).ToString())),
                     },
                 };
                 foreach (var item in order.Basket)
@@ -392,18 +402,16 @@ namespace Content.Client.Cargo.UI
 
             Basket.RemoveAllChildren();
 
-            var totalCost = 0;
             foreach (var item in basket)
             {
                 if (!_protoManager.Resolve<CargoProductPrototype>(item.Product, out var prototype))
                     continue;
-                var cost = prototype.Cost * item.Quantity;
                 var row = new CargoBasketRow
                 {
                     Product = prototype,
                     ProductName = { Text = prototype.Name },
                     Amount = { Value = item.Quantity },
-                    PointCost = { Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", cost.ToString())) },
+                    PointCost = { Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (prototype.Cost * item.Quantity).ToString())) },
                     Icon = { Texture = _spriteSystem.Frame0(prototype.Icon) },
                 };
 
@@ -411,32 +419,23 @@ namespace Content.Client.Cargo.UI
                 {
                     item.Quantity = row.Amount.Value;
                     row.PointCost.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (prototype.Cost * item.Quantity).ToString()));
-                    BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", GetBasketTotal(basket).ToString()));
+                    var containers = _cargoSystem.PackBasketIntoContainers(ref basket);
+                    BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (_cargoSystem.GetBasketCost(basket) + _cargoSystem.GetContainersCost(containers)).ToString()));
+                    ContainerCost.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetContainersCost(containers).ToString()));
                 };
                 row.Remove.OnPressed += (_) =>
                 {
                     basket.Remove(item);
                     row.Orphan();
-                    BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", GetBasketTotal(basket).ToString()));
+                    var containers = _cargoSystem.PackBasketIntoContainers(ref basket);
+                    BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", (_cargoSystem.GetBasketCost(basket) + _cargoSystem.GetContainersCost(containers)).ToString()));
+                    ContainerCost.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetContainersCost(containers).ToString()));
                 };
-                totalCost += cost;
                 Basket.AddChild(row);
             }
-            BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", totalCost.ToString()));
+            ContainerCost.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetContainersCost(_cargoSystem.PackBasketIntoContainers(ref basket)).ToString()));
+            BasketTotal.Text = Loc.GetString("cargo-console-menu-points-amount", ("amount", _cargoSystem.GetBasketTotalCost(basket).ToString()));
 
-        }
-
-        private int GetBasketTotal(List<CargoOrderItemData> basket)
-        {
-            var totalCost = 0;
-            foreach (var item in basket)
-            {
-                if (!_protoManager.Resolve<CargoProductPrototype>(item.Product, out var prototype))
-                    continue;
-                var cost = prototype.Cost * item.Quantity;
-                totalCost += cost;
-            }
-            return totalCost;
         }
 
         public void PopulateAccountActions()
