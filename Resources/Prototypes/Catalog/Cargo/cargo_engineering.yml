@@ -43,16 +43,6 @@
   group: market
 
 - type: cargoProduct
-  id: EngineeringCableBulk
-  icon:
-    sprite: Objects/Tools/cable-coils.rsi
-    state: coilall-30
-  product: CrateEngineeringCableBulk
-  cost: 600
-  category: cargoproduct-category-name-engineering
-  group: market
-
-- type: cargoProduct
   id: EngineeringElectricalSupplies
   icon:
     sprite: Objects/Tools/Toolboxes/toolbox_yellow.rsi
@@ -110,8 +100,11 @@
   icon:
     sprite: Clothing/Head/Helmets/eva.rsi
     state: icon
-  product: CrateEvaKit
-  cost: 5000
+  products:
+  - ClothingHeadHelmetEVA
+  - ClothingOuterHardsuitEVA
+  container: CrateCommandSecure
+  cost: 2500
   category: cargoproduct-category-name-engineering
   group: market
 

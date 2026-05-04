@@ -111,8 +111,11 @@
   icon:
     sprite: Clothing/Head/Hoods/Bio/bio.rsi
     state: icon
-  product: CrateVirologyBiosuit
-  cost: 800
+  products:
+  - ClothingOuterBioVirology
+  - ClothingHeadHatHoodBioVirology
+  container: CrateMedicalSecure
+  cost: 400
   category: cargoproduct-category-name-medical
   group: market
 

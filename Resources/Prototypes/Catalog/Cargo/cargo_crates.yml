@@ -163,3 +163,11 @@
   required: true
   maxItems: 30
   cost: 100
+
+- type: cargoCrate
+  id: CratePirate
+  entity: CratePirate
+  containerId: entity_storage
+  required: true
+  maxItems: 30
+  cost: 500

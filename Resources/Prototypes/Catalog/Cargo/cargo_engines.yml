@@ -47,8 +47,20 @@
   icon:
     sprite: Structures/Power/Generation/Singularity/collector.rsi
     state: ca_on
-  product: CrateEngineeringSingularityCollector
-  cost: 1000
+  product: RadiationCollectorFlatpack
+  container: CrateEngineeringSecure
+  cost: 500
+  category: cargoproduct-category-name-engineering
+  group: market
+
+- type: cargoProduct
+  id: PlasmaTank
+  icon:
+    sprite: Objects/Tanks/plasma.rsi
+    state: icon
+  product: PlasmaTankFilled
+  container: CrateEngineeringSecure
+  cost: 500
   category: cargoproduct-category-name-engineering
   group: market
 
@@ -57,7 +69,15 @@
   icon:
     sprite: Structures/Power/Generation/PA/control_box.rsi
     state: completed
-  product: CrateEngineeringParticleAccelerator
+  products:
+  - MachineParticleAcceleratorEndCapCircuitboard
+  - MachineParticleAcceleratorEmitterStarboardCircuitboard
+  - MachineParticleAcceleratorEmitterForeCircuitboard
+  - MachineParticleAcceleratorEmitterPortCircuitboard
+  - MachineParticleAcceleratorFuelChamberCircuitboard
+  - MachineParticleAcceleratorPowerBoxCircuitboard
+  - ParticleAcceleratorComputerCircuitboard
+  container: CrateEngineeringSecure
   cost: 2000
   category: cargoproduct-category-name-engineering
   group: market
@@ -67,8 +87,9 @@
   icon:
     sprite: Objects/Devices/flatpack.rsi
     state: solar-assembly-part
-  product: CrateEngineeringSolar
-  cost: 1250
+  product: SolarAssemblyFlatpack
+  container: CrateEngineering
+  cost: 100
   category: cargoproduct-category-name-engineering
   group: market
 
