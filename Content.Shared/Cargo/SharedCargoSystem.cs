@@ -321,23 +321,21 @@ public abstract class SharedCargoSystem : EntitySystem
     {
         return container.Container != ""
             && (EntProtoId)container.Container == crate.Entity
-            && GetContainerItemCount(container) <= container.MaxItems - item.Quantity
+            && GetContainerItemCount(container, totalEntities: true) <= container.MaxItems - item.Quantity
             && container.CrateRequired == crate.Required;
     }
 
-    public int GetContainerItemCount(CargoOrderContainerData container)
+    public int GetContainerItemCount(CargoOrderContainerData container, bool totalEntities = false)
     {
-        var count = 0;
-        foreach (var item in container.Products)
-        {
-            if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var proto))
+        return container.Products.Sum(item =>
             {
-                count += 1;
-                continue;
+                if (!_protoMan.TryIndex<CargoProductPrototype>(item.Product, out var proto))
+                {
+                    return 1;
+                }
+                return item.Quantity * (totalEntities ? proto.SpawnList.Count() : 1);
             }
-            count += item.Quantity * proto.SpawnList.Count();
-        }
-        return count;
+            );
     }
 
 
