@@ -312,6 +312,18 @@ public abstract class SharedCargoSystem : EntitySystem
             containers.Add(container);
             remaining -= batch * GetItemEntityCount(item);
         }
+        var parcel = (ProtoId<CargoCratePrototype>)"WrappedParcel";
+        foreach (var container in containers)
+        {
+            if (ShouldWrapAsParcel(container)
+                && _protoMan.Resolve<CargoCratePrototype>(parcel, out var parcelProto))
+            {
+                container.Container = parcelProto.Entity;
+                container.ContainerID = parcelProto.ContainerId;
+                container.Cost = parcelProto.Cost;
+                container.MaxItems = parcelProto.MaxItems;
+            }
+        }
     }
 
     private bool CanFitInContainer(
@@ -339,6 +351,13 @@ public abstract class SharedCargoSystem : EntitySystem
             return 1;
         }
         return proto.SpawnList.Count();
+    }
+
+    private bool ShouldWrapAsParcel(CargoOrderContainerData container)
+    {
+        return !container.IsSingleProduct
+            && GetContainerItemCount(container) == 1
+            && !container.CrateRequired;
     }
 
 }

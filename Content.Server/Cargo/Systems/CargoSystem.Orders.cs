@@ -577,30 +577,16 @@ namespace Content.Server.Cargo.Systems
             List<CargoOrderContainerData> containers,
             CargoOrderData order)
         {
-            var parcel = (ProtoId<CargoCratePrototype>)"WrappedParcel";
-
             foreach (var container in containers)
             {
                 container.LabelMessage = GetContainerLabel(container, order);
                 container.LabelName = Loc.GetString(
                     "cargo-console-paper-print-name",
                     ("orderNumber", order.OrderId));
-
-                if (ShouldWrapAsParcel(container)
-                    && _protoMan.Resolve<CargoCratePrototype>(parcel, out var crate))
-                {
-                    container.Container = crate.Entity;
-                    container.ContainerID = crate.ContainerId;
-                }
             }
         }
 
-        private bool ShouldWrapAsParcel(CargoOrderContainerData container)
-        {
-            return !container.IsSingleProduct
-                && GetContainerItemCount(container) == 1
-                && !container.CrateRequired;
-        }
+
         /// <summary>
         /// Count the number of items which will be spawned in a container
         /// </summary>
