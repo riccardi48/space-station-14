@@ -445,7 +445,8 @@
   components:
   - type: PointLight
     enabled: false
-    radius: 5
+    radius: 8
+    curveFactor: 0.8
     energy: 0.6
     offset: "0, 0.4"
     color: "#7CFC00"
@@ -458,7 +459,7 @@
     # This can not be done by changing the charge rate as the power supply ramps up over time.
     # This disables prediction for this battery.
     netsync: false
-    maxCharge: 30000
+    maxCharge: 4500
     startingCharge: 0
   - type: EmergencyLight
   - type: RotatingLight
