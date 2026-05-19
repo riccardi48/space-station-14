@@ -1,30 +1,85 @@
-<cartridges:MessengerCartridgeUiFragment xmlns:cartridges="clr-namespace:Content.Client.CartridgeLoader.Cartridges"
-                                        xmlns="https://spacestation14.io" Margin="1 0 2 0">
+<cartridges:MessengerCartridgeUiFragment
+    xmlns="https://spacestation14.io"
+    xmlns:cartridges="clr-namespace:Content.Client.CartridgeLoader.Cartridges"
+    Margin="1,0,2,0">
 
-    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
-        <!-- Connected status -->
-        <BoxContainer Name="ConnectedContainer" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Visible="False">
-            <BoxContainer Name="UserListContainer" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
-            </BoxContainer>
-            <BoxContainer Name="MessageBoxContainer" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="MessageInputContainer" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Visible="False">
-                    <BoxContainer Name="ChatHeader" Orientation="Horizontal" HorizontalExpand="True">
-                        <Button Name="BackButton" Text="{Loc messenger-back}" SetWidth="50"/>
-                        <Label Name="ChatPartnerLabel" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalExpand="True"/>
+    <BoxContainer
+        HorizontalExpand="True"
+        Orientation="Vertical"
+        VerticalExpand="True">
+        <!--  Connected status  -->
+        <BoxContainer
+            Name="ConnectedContainer"
+            HorizontalExpand="True"
+            Orientation="Vertical"
+            VerticalExpand="True"
+            Visible="False">
+            <BoxContainer
+                Name="UserListContainer"
+                HorizontalExpand="True"
+                Orientation="Vertical"
+                VerticalExpand="True" />
+            <BoxContainer
+                Name="MessageBoxContainer"
+                HorizontalExpand="True"
+                Orientation="Vertical"
+                VerticalExpand="True">
+                <BoxContainer
+                    Name="MessageInputContainer"
+                    HorizontalExpand="True"
+                    Orientation="Vertical"
+                    VerticalExpand="True"
+                    Visible="False">
+                    <BoxContainer
+                        Name="ChatHeader"
+                        HorizontalExpand="True"
+                        Orientation="Horizontal">
+                        <Button
+                            Name="BackButton"
+                            SetWidth="50"
+                            Text="{Loc messenger-back}" />
+                        <Label
+                            Name="ChatPartnerLabel"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            HorizontalExpand="True" />
                     </BoxContainer>
-                    <ScrollContainer Name="MessageScrollContainer" HorizontalExpand="True" VerticalExpand="True" VScrollEnabled="True" HScrollEnabled="False">
-                        <BoxContainer Orientation="Vertical" Name="MessageContainer" HorizontalExpand="True" VerticalExpand="True"/>
+                    <ScrollContainer
+                        Name="MessageScrollContainer"
+                        HScrollEnabled="False"
+                        HorizontalExpand="True"
+                        VScrollEnabled="True"
+                        VerticalExpand="True">
+                        <BoxContainer
+                            Name="MessageContainer"
+                            HorizontalExpand="True"
+                            Orientation="Vertical"
+                            VerticalExpand="True" />
                     </ScrollContainer>
-                    <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
-                        <LineEdit Name="MessageInput" HorizontalExpand="True" SetHeight="32"/>
-                        <Button Name="SendButton" Text="{Loc messenger-send}" SetWidth="50"/>
+                    <BoxContainer HorizontalExpand="True" Orientation="Horizontal">
+                        <LineEdit
+                            Name="MessageInput"
+                            HorizontalExpand="True"
+                            SetHeight="32" />
+                        <Button
+                            Name="SendButton"
+                            SetWidth="50"
+                            Text="{Loc messenger-send}" />
                     </BoxContainer>
                 </BoxContainer>
             </BoxContainer>
         </BoxContainer>
-        <!-- Connection lost status -->
-        <BoxContainer Name="ConnectionLostContainer" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Visible="False">
-            <Label Text="{Loc messenger-status-connection-lost}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <!--  Connection lost status  -->
+        <BoxContainer
+            Name="ConnectionLostContainer"
+            HorizontalExpand="True"
+            Orientation="Vertical"
+            VerticalExpand="True"
+            Visible="False">
+            <Label
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Loc messenger-status-connection-lost}" />
         </BoxContainer>
     </BoxContainer>
 </cartridges:MessengerCartridgeUiFragment>
