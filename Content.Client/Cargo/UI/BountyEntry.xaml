@@ -1,36 +1,41 @@
-﻿<BoxContainer xmlns="https://spacestation14.io"
-              xmlns:customControls="clr-namespace:Content.Client.Administration.UI.CustomControls"
-              Margin="10 10 10 0"
-              HorizontalExpand="True"
-              Visible="True">
-    <PanelContainer StyleClasses="BackgroundPanel" HorizontalExpand="True">
-        <BoxContainer Orientation="Vertical"
-                      HorizontalExpand="True">
+﻿<BoxContainer
+    xmlns="https://spacestation14.io"
+    xmlns:customControls="clr-namespace:Content.Client.Administration.UI.CustomControls"
+    Margin="10,10,10,0"
+    HorizontalExpand="True"
+    Visible="True">
+    <PanelContainer HorizontalExpand="True" StyleClasses="BackgroundPanel">
+        <BoxContainer HorizontalExpand="True" Orientation="Vertical">
             <BoxContainer Orientation="Horizontal">
-                <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-                    <RichTextLabel Name="RewardLabel"/>
-                    <RichTextLabel Name="ManifestLabel"/>
+                <BoxContainer HorizontalExpand="True" Orientation="Vertical">
+                    <RichTextLabel Name="RewardLabel" />
+                    <RichTextLabel Name="ManifestLabel" />
                 </BoxContainer>
-                <Control MinWidth="10"/>
-                <BoxContainer Orientation="Vertical" MinWidth="120">
-                    <BoxContainer Orientation="Horizontal" MinWidth="120">
-                        <Button Name="PrintButton"
-                                Text="{Loc 'bounty-console-label-button-text'}"
-                                HorizontalExpand="False"
-                                HorizontalAlignment="Right"
-                                StyleClasses="OpenRight"/>
-                        <Button Name="SkipButton"
-                                Text="{Loc 'bounty-console-skip-button-text'}"
-                                HorizontalExpand="False"
-                                HorizontalAlignment="Right"
-                                StyleClasses="OpenLeft"/>
+                <Control MinWidth="10" />
+                <BoxContainer MinWidth="120" Orientation="Vertical">
+                    <BoxContainer MinWidth="120" Orientation="Horizontal">
+                        <Button
+                            Name="PrintButton"
+                            HorizontalAlignment="Right"
+                            HorizontalExpand="False"
+                            StyleClasses="OpenRight"
+                            Text="{Loc 'bounty-console-label-button-text'}" />
+                        <Button
+                            Name="SkipButton"
+                            HorizontalAlignment="Right"
+                            HorizontalExpand="False"
+                            StyleClasses="OpenLeft"
+                            Text="{Loc 'bounty-console-skip-button-text'}" />
                     </BoxContainer>
-                    <RichTextLabel Name="IdLabel" HorizontalAlignment="Right" Margin="0 0 5 0"/>
+                    <RichTextLabel
+                        Name="IdLabel"
+                        Margin="0,0,5,0"
+                        HorizontalAlignment="Right" />
                 </BoxContainer>
             </BoxContainer>
-            <customControls:HSeparator Margin="5 10 5 10"/>
+            <customControls:HSeparator Margin="5,10,5,10" />
             <BoxContainer>
-                <RichTextLabel Name="DescriptionLabel"/>
+                <RichTextLabel Name="DescriptionLabel" />
             </BoxContainer>
         </BoxContainer>
     </PanelContainer>

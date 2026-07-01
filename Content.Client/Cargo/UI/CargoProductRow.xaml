@@ -1,34 +1,38 @@
-<BoxContainer xmlns="https://spacestation14.io"
-    HorizontalExpand="True">
+<BoxContainer xmlns="https://spacestation14.io" HorizontalExpand="True">
     <PanelContainer HorizontalExpand="True">
-        <!-- Btn position hardcoded (args.Button.Parent?.Parent type) in CargoConsoleBUI 71 line -->
-        <Button Name="MainButton"
-                ToolTip=""
+        <!--  Btn position hardcoded (args.Button.Parent?.Parent type) in CargoConsoleBUI 71 line  -->
+        <Button
+            Name="MainButton"
+            Access="Public"
+            StyleClasses="OpenBoth"
+            ToolTip=""
+            VerticalExpand="False" />
+
+        <!--  Icon & Name  -->
+        <BoxContainer
+            Margin="4,0"
+            HorizontalExpand="True"
+            Orientation="Horizontal">
+
+            <TextureRect
+                Name="Icon"
                 Access="Public"
-                VerticalExpand="False"
-                StyleClasses="OpenBoth" />
+                MinSize="32 32"
+                RectClipContent="True" />
 
-        <!-- Icon & Name -->
-        <BoxContainer Orientation="Horizontal"
-                      HorizontalExpand="True"
-                      Margin="4 0">
-
-            <TextureRect Name="Icon"
-                         Access="Public"
-                         MinSize="32 32"
-                         RectClipContent="True" />
-
-            <Label Name="ProductName"
-                   Access="Public"
-                   HorizontalExpand="True"
-                   ClipText="True" />
+            <Label
+                Name="ProductName"
+                Access="Public"
+                ClipText="True"
+                HorizontalExpand="True" />
         </BoxContainer>
     </PanelContainer>
 
-    <Label Name="PointCost"
-           Access="Public"
-           MinSize="56 32"
-           Align="Right"
-           Margin="0 0 5 0"
-           HorizontalAlignment="Right"/>
+    <Label
+        Name="PointCost"
+        Margin="0,0,5,0"
+        HorizontalAlignment="Right"
+        Access="Public"
+        Align="Right"
+        MinSize="56 32" />
 </BoxContainer>
