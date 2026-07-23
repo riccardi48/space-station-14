@@ -37,8 +37,7 @@ namespace Content.Server.Stack
                 return null;
 
             // Set the output parameter in the event instance to the newly split stack.
-            var newEntity = PredictedSpawnAtPosition(stackType.Spawn, spawnPosition);
-            Xform.SetParent(newEntity, spawnPosition.EntityId);
+            var newEntity = SpawnAtPosition(stackType.Spawn, spawnPosition);
 
             // There should always be a StackComponent
             var stackComp = _stackQuery.Comp(newEntity);

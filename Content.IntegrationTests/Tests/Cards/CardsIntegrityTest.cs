@@ -235,7 +235,7 @@ public sealed partial class CardsTest : GameTest
             Assert.That(cards.Cards.Count + splitCards.Cards.Count, Is.EqualTo(before));
             Assert.That(stack.Count + splitStack.Count, Is.EqualTo(stackBefore));
 
-            _sStacks.UserSplit((uid, stack), (player, playerXform), cards.Cards.Count - 1);
+            _sStacks.UserSplit((uid, stack), player, cards.Cards.Count - 1);
 
             Assert.That(cards.Cards.Count + splitCards.Cards.Count, Is.EqualTo(before));
             Assert.That(stack.Count + splitStack.Count, Is.EqualTo(stackBefore));

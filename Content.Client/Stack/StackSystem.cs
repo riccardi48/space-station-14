@@ -3,7 +3,6 @@ using Content.Client.Storage.Systems;
 using Content.Shared.Stacks;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
-using Robust.Shared.Map;
 
 namespace Content.Client.Stack
 {
@@ -116,11 +115,5 @@ namespace Content.Client.Stack
         }
 
         #endregion
-
-        [PublicAPI]
-        public override EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition)
-        {
-            return null;
-        }
     }
 }

@@ -59,7 +59,7 @@ public abstract partial class SharedCardSystem
     public CardListVisualState GetCardListVisualState(CardsComponent cards)
     {
         var count = Math.Min(cards.Fanned ? cards.MaxFanned : 1, cards.Cards.Count);
-        var start = cards.Flipped ? cards.Cards.Count - count : 0;
+        var start = cards.Flipped ? Math.Max(cards.Cards.Count - count - cards.AmountCycled, 0) : cards.AmountCycled;
         return new CardListVisualState(cards.Cards, start, count);
     }
 

@@ -27,8 +27,6 @@ public abstract partial class SharedStackSystem : EntitySystem
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedStorageSystem _storage = default!;
-    [Dependency] protected IGameTiming _timing = default!;
-
     [Dependency] private EntityQuery<StackComponent> _stackQuery;
 
     // TODO: These should be in the prototype.
@@ -95,6 +93,7 @@ public abstract partial class SharedStackSystem : EntitySystem
                 _popup.PopupCoordinates(Loc.GetString("comp-stack-already-full"), popupPos, args.User);
                 break;
         }
+
         if (ent.Comp.AnimatePickup)
         {
             var localRotation = Transform(args.Used).LocalRotation;
@@ -282,17 +281,6 @@ public abstract partial class SharedStackSystem : EntitySystem
     {
         return null;
     }
-
-    /// <summary>
-    /// Spawns a new entity and moves an amount to it from the stack.
-    /// Moves nothing if amount is greater than ent's stack count.
-    /// </summary>
-    /// <param name="ent">Entity to split in a new stack.</param>
-    /// <param name="amount">How much to move to the new entity.</param>
-    /// <param name="spawnPosition">Where to spawn the new stack</param>
-    /// <returns>Null if StackComponent doesn't resolve, or amount to move is greater than ent has available.</returns>
-    [PublicAPI]
-    public abstract EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition);
 }
 
 /// <summary>

@@ -46,7 +46,7 @@ public abstract partial class SharedCardSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<CardsComponent, ComponentInit>(OnCardsInit);
-        SubscribeLocalEvent<CardsComponent, MergeEvent>(OnMergeEvent);
+        SubscribeLocalEvent<CardsComponent, StackMergeEvent>(OnMergeEvent);
         SubscribeLocalEvent<CardsComponent, StackSplitEvent>(OnSplitEvent);
         SubscribeLocalEvent<CardsComponent, EntGotInsertedIntoContainerMessage>(OnCardsContainerInserted);
         SubscribeNetworkEvent<ShuffleCardsEvent>(HandleShuffleCardsEvent);
@@ -74,22 +74,22 @@ public abstract partial class SharedCardSystem : EntitySystem
         }
     }
 
-    private void OnMergeEvent(Entity<CardsComponent> ent, ref MergeEvent args)
+    private void OnMergeEvent(Entity<CardsComponent> ent, ref StackMergeEvent args)
     {
-        if (!TryComp<CardsComponent>(args.Mergee, out var mergeeComp))
+        if (!TryComp<CardsComponent>(args.Recipient, out var recipientComp))
             return;
         // If BeingCherryPicked the merging is sorted elsewhere
-        if (ent.Comp.BeingCherryPicked || mergeeComp.BeingCherryPicked)
+        if (ent.Comp.BeingCherryPicked || recipientComp.BeingCherryPicked)
             return;
 
         // Animation must be before cards move
-        PlayCardDrawAnimation(ent, (args.Mergee, mergeeComp), args.Delta);
-        TakeFromDeck(ent.Comp, mergeeComp, args.Delta);
+        PlayCardDrawAnimation(ent, (args.Recipient, recipientComp), args.Amount);
+        TakeFromDeck(ent.Comp, recipientComp, args.Amount);
         UpdateVisualState(ent);
-        UpdateVisualState((args.Mergee, mergeeComp));
+        UpdateVisualState((args.Recipient, recipientComp));
 
         Dirty(ent.Owner, ent.Comp);
-        Dirty(args.Mergee, mergeeComp);
+        Dirty(args.Recipient, recipientComp);
     }
 
     private void OnSplitEvent(Entity<CardsComponent> ent, ref StackSplitEvent args)
@@ -110,7 +110,7 @@ public abstract partial class SharedCardSystem : EntitySystem
             (args.NewId, splitComp),
             ent,
             delta,
-            playOnUser: Hands.GetActiveItem(Transform(ent.Owner).ParentUid) != ent.Owner
+            playOnUser: Hands.GetActiveItem(args.User ?? EntityUid.Invalid) != ent.Owner
         );
         TakeFromDeck(splitComp, ent.Comp, delta);
         // Copy state over to new entity
