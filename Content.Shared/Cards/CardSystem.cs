@@ -76,20 +76,20 @@ public abstract partial class SharedCardSystem : EntitySystem
 
     private void OnMergeEvent(Entity<CardsComponent> ent, ref StackMergeEvent args)
     {
-        if (!TryComp<CardsComponent>(args.Recipient, out var recipientComp))
+        if (!TryComp<CardsComponent>(args.Donor, out var donorComp))
             return;
         // If BeingCherryPicked the merging is sorted elsewhere
-        if (ent.Comp.BeingCherryPicked || recipientComp.BeingCherryPicked)
+        if (ent.Comp.BeingCherryPicked || donorComp.BeingCherryPicked)
             return;
 
         // Animation must be before cards move
-        PlayCardDrawAnimation(ent, (args.Recipient, recipientComp), args.Amount);
-        TakeFromDeck(ent.Comp, recipientComp, args.Amount);
+        PlayCardDrawAnimation(ent, (args.Donor, donorComp), args.Amount);
+        TakeFromDeck(ent.Comp, donorComp, args.Amount);
         UpdateVisualState(ent);
-        UpdateVisualState((args.Recipient, recipientComp));
+        UpdateVisualState((args.Donor, donorComp));
 
         Dirty(ent.Owner, ent.Comp);
-        Dirty(args.Recipient, recipientComp);
+        Dirty(args.Donor, donorComp);
     }
 
     private void OnSplitEvent(Entity<CardsComponent> ent, ref StackSplitEvent args)
