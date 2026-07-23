@@ -1,5 +1,3 @@
-using System.Linq;
-using Content.Shared.Examine;
 using Content.Shared.Stacks;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
@@ -12,26 +10,12 @@ public abstract partial class SharedCardSystem
     private void InitializeVisuals()
     {
         SubscribeLocalEvent<CardsComponent, ComponentStartup>(OnCardsStarted);
-        SubscribeLocalEvent<CardsComponent, ExaminedEvent>(OnCardsExamined);
         SubscribeLocalEvent<CardsComponent, StackCountChangedEvent>(OnStackCountChanged);
     }
 
     private void OnCardsStarted(Entity<CardsComponent> ent, ref ComponentStartup args)
     {
         UpdateVisualState(ent);
-    }
-
-    private void OnCardsExamined(Entity<CardsComponent> ent, ref ExaminedEvent args)
-    {
-        // Can only see top card if the deck is flipped
-        if (!args.IsInDetailsRange || !ent.Comp.Flipped)
-            return;
-
-        var cards = GetCardListVisualState(ent.Comp);
-        var cardName = (string)cards.CardList.Last().CardId;
-        args.PushMarkup(
-            Loc.GetString("comp-cards-examine-detail", ("card", Loc.GetString(cardName.Replace('_', '-'))))
-        );
     }
 
     private void OnStackCountChanged(Entity<CardsComponent> ent, ref StackCountChangedEvent args)
@@ -60,11 +44,20 @@ public abstract partial class SharedCardSystem
         }
     }
 
+    /// <summary>
+    /// Builds the <see cref="CardListVisualState"/> describing which cards in the stack are currently
+    /// visible to the player and should be rendered, based on whether the stack is fanned or flipped.
+    /// </summary>
+    /// <remarks>
+    /// This determines what the client renders for the card sprite:
+    /// if not fanned, only the top card is shown; if fanned, up to <see cref="CardsComponent.MaxFanned"/>
+    /// cards are shown. If the stack is flipped, the visible window is taken from the end of the list
+    /// instead of the start.
+    /// </remarks>
+    /// <param name="cards">The card stack component to compute the visual state for.</param>
+    /// <returns>A <see cref="CardListVisualState"/> describing the visible slice of cards.</returns>
     public CardListVisualState GetCardListVisualState(CardsComponent cards)
     {
-        // This gets the cards the player could see
-        // This function controls a lot of the client side sprite
-        // Very important this is correct
         var count = Math.Min(cards.Fanned ? cards.MaxFanned : 1, cards.Cards.Count);
         var start = cards.Flipped ? cards.Cards.Count - count : 0;
         return new CardListVisualState(cards.Cards, start, count);
@@ -141,9 +134,9 @@ public enum CardVisuals : byte
 [Serializable, NetSerializable]
 public sealed class CardListVisualState : ICloneable
 {
-    public readonly List<CardData> CardList;
-    public readonly int Start;
-    public readonly int Count;
+    public List<CardData> CardList;
+    public int Start;
+    public int Count;
 
     public CardListVisualState(List<CardData> cardList, int start, int count)
     {

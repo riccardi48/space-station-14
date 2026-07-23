@@ -4,6 +4,7 @@ using Content.Shared.Popups;
 using Content.Shared.Stacks;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -38,6 +39,9 @@ public abstract partial class SharedCardSystem : EntitySystem
     [Dependency]
     protected IPrototypeManager PrototypeManager = default!;
 
+    [Dependency]
+    protected ISharedPlayerManager PlayerManager = default!;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -45,6 +49,11 @@ public abstract partial class SharedCardSystem : EntitySystem
         SubscribeLocalEvent<CardsComponent, MergeEvent>(OnMergeEvent);
         SubscribeLocalEvent<CardsComponent, StackSplitEvent>(OnSplitEvent);
         SubscribeLocalEvent<CardsComponent, EntGotInsertedIntoContainerMessage>(OnCardsContainerInserted);
+        SubscribeNetworkEvent<ShuffleCardsEvent>(HandleShuffleCardsEvent);
+        SubscribeNetworkEvent<FlipCardsEvent>(HandleFlipCardsEvent);
+        SubscribeNetworkEvent<FanCardsEvent>(HandleFanCardsEvent);
+        SubscribeNetworkEvent<TakeCardEvent>(HandleTakeCardEvent);
+        SubscribeNetworkEvent<CycleCardsEvent>(HandleCycleCardsEvent);
         InitializeVisuals();
         InitializeInteraction();
     }
@@ -107,6 +116,7 @@ public abstract partial class SharedCardSystem : EntitySystem
         // Copy state over to new entity
         splitComp.Flipped = ent.Comp.Flipped;
         splitComp.Fanned = ent.Comp.Fanned;
+        ent.Comp.AmountCycled = Math.Clamp(ent.Comp.AmountCycled, 0, ent.Comp.Cards.Count);
 
         UpdateVisualState(ent);
         UpdateVisualState((args.NewId, splitComp));
@@ -117,6 +127,7 @@ public abstract partial class SharedCardSystem : EntitySystem
 
     private void OnCardsContainerInserted(Entity<CardsComponent> ent, ref EntGotInsertedIntoContainerMessage args)
     {
+        UpdateVisualState(ent);
         // Unfans cards put inside containers except hands
         if (ent.Comp.Fanned && !Hands.EnumerateHands(args.Container.Owner).Contains(args.Container.ID))
             TryFanCards(ent);
@@ -154,11 +165,22 @@ public abstract partial class SharedCardSystem : EntitySystem
         return comp.Cards.Take(delta).ToList();
     }
 
+    private void HandleShuffleCardsEvent(ShuffleCardsEvent args)
+    {
+        var cards = GetEntity(args.Cards);
+        if (TryComp<CardsComponent>(cards, out var comp))
+            TryShuffleCards((cards, comp));
+    }
+
+    /// <summary>
+    /// Attempts to shuffle the cards within the given <see cref="CardsComponent"/> into a random order.
+    /// </summary>
+    /// <param name="cards">The card stack entity to shuffle.</param>
+    /// <returns><c>true</c> if the cards were shuffled. Currently always returns <c>true</c>.</returns>
+    // Currently mis-predicted
+    // TODO: FIX this mis-predict and replace with a proper animation
     public bool TryShuffleCards(Entity<CardsComponent> cards)
     {
-        // Shuffles cards
-        // Currently mis-predicted
-        // TODO: FIX this mis-predict and replace with a proper animation
         cards.Comp.Cards = cards.Comp.Cards.Shuffle().ToList();
         UpdateVisualState(cards);
         Audio.PlayPredicted(cards.Comp.ShuffleSound, cards, null);
@@ -166,6 +188,18 @@ public abstract partial class SharedCardSystem : EntitySystem
         return true;
     }
 
+    private void HandleFlipCardsEvent(FlipCardsEvent args)
+    {
+        var cards = GetEntity(args.Cards);
+        if (TryComp<CardsComponent>(cards, out var comp))
+            TryFlipCards((cards, comp));
+    }
+
+    /// <summary>
+    /// Attempts to flip the given card stack, toggling which side is face-up.
+    /// </summary>
+    /// <param name="cards">The card stack entity to flip.</param>
+    /// <returns><c>true</c> if the cards were flipped. Currently always returns <c>true</c>.</returns>
     public bool TryFlipCards(Entity<CardsComponent> cards)
     {
         cards.Comp.Flipped = !cards.Comp.Flipped;
@@ -174,16 +208,50 @@ public abstract partial class SharedCardSystem : EntitySystem
         return true;
     }
 
+    private void HandleFanCardsEvent(FanCardsEvent args)
+    {
+        var cards = GetEntity(args.Cards);
+        if (TryComp<CardsComponent>(cards, out var comp))
+            TryFanCards((cards, comp));
+    }
+
+    /// <summary>
+    /// Attempts to toggle whether the given card stack is displayed fanned out.
+    /// Resets the cycled amount when un-fanning.
+    /// </summary>
+    /// <param name="cards">The card stack entity to fan or unfan.</param>
+    /// <returns><c>true</c> if the fan state was toggled. Currently always returns <c>true</c>.</returns>
     public bool TryFanCards(Entity<CardsComponent> cards)
     {
         cards.Comp.Fanned = !cards.Comp.Fanned;
+        if (!cards.Comp.Fanned)
+            cards.Comp.AmountCycled = 0;
         UpdateVisualState(cards);
         // Stack count updated so the deck below the fan shows the correct number of cards
-        UpdateStackCount(cards);
         Dirty(cards.Owner, cards.Comp);
         return true;
     }
 
+    private void HandleTakeCardEvent(TakeCardEvent args)
+    {
+        var cards = GetEntity(args.Cards);
+        var user = GetEntity(args.User);
+        if (TryComp<CardsComponent>(cards, out var comp) && TryComp<TransformComponent>(user, out var transComp))
+            TryTakeCard((cards, comp), (user, transComp), args.CardInx, out _);
+    }
+
+    /// <summary>
+    /// Attempts to take a specific card from a fanned stack and move it into the user's active hand,
+    /// splitting the stack as needed.
+    /// </summary>
+    /// <param name="cards">The card stack entity to take a card from.</param>
+    /// <param name="user">The entity attempting to take the card.</param>
+    /// <param name="cardInx">The index of the specific card being taken from the stack.</param>
+    /// <param name="split">
+    /// When this method returns, contains the entity that the split-off card(s) ended up on,
+    /// or <c>null</c> if no split occurred or the operation failed.
+    /// </param>
+    /// <returns><c>true</c> if the card was successfully taken; otherwise <c>false</c>.</returns>
     public bool TryTakeCard(
         Entity<CardsComponent> cards,
         Entity<TransformComponent?> user,
@@ -223,6 +291,8 @@ public abstract partial class SharedCardSystem : EntitySystem
         var card = GetCardFromInx(cards.Comp.Cards, cardInx);
         if (!card.HasValue)
         {
+            if (!Exists(cards.Owner))
+                return false;
             if (!TryComp<StackComponent>(split, out var splitStack))
                 return false;
             var count = splitStack.Count;
@@ -234,6 +304,7 @@ public abstract partial class SharedCardSystem : EntitySystem
 
         PlayCardTakeAnimation((split.Value, newCardsComp), cards, cardInx);
         MoveCards(newCardsComp, cards.Comp, new List<CardData> { card.Value });
+        cards.Comp.AmountCycled = Math.Clamp(cards.Comp.AmountCycled, 0, cards.Comp.Cards.Count);
         // If this is true it is a new deck so copies over the properties
         // Otherwise it doesn't change the deck the card joins
         if (newCardsComp.Cards.Count == 1)
@@ -254,6 +325,40 @@ public abstract partial class SharedCardSystem : EntitySystem
         return true;
     }
 
+    private void HandleCycleCardsEvent(CycleCardsEvent args)
+    {
+        var cards = GetEntity(args.Cards);
+        if (TryComp<CardsComponent>(cards, out var comp))
+            TryCycleCards((cards, comp), args.Amount);
+    }
+
+    /// <summary>
+    /// Attempts to cycle the visible window of a fanned card stack by the given amount,
+    /// clamped to the valid range of card indices.
+    /// </summary>
+    /// <param name="cards">The card stack entity to cycle.</param>
+    /// <param name="amount">The amount to adjust the cycled offset by; can be negative.</param>
+    /// <returns><c>true</c> if the cards were cycled; <c>false</c> if the stack is not currently fanned.</returns>
+    public bool TryCycleCards(Entity<CardsComponent> cards, int amount)
+    {
+        if (!cards.Comp.Fanned)
+            return false;
+
+        cards.Comp.AmountCycled = Math.Clamp(cards.Comp.AmountCycled + amount, 0, cards.Comp.Cards.Count);
+
+        UpdateVisualState(cards);
+
+        Dirty(cards.Owner, cards.Comp);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Finds the <see cref="CardData"/> in the given list whose card index matches the specified value.
+    /// </summary>
+    /// <param name="cards">The list of cards to search.</param>
+    /// <param name="cardInx">The card index to search for.</param>
+    /// <returns>The matching <see cref="CardData"/>, or <c>null</c> if no card with that index exists.</returns>
     public CardData? GetCardFromInx(List<CardData> cards, int cardInx)
     {
         var card = cards.Find(c => c.CardInx == cardInx);

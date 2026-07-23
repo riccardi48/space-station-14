@@ -1,12 +1,16 @@
 using System.Linq;
 using System.Numerics;
 using Content.Client.Gameplay;
+using Content.Client.Stack;
+using Content.Client.Storage.Systems;
 using Content.Shared.Cards;
 using Content.Shared.Interaction.Events;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Stacks;
 using Content.Shared.Storage.EntitySystems;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
+using Robust.Client.Player;
 using Robust.Client.State;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
@@ -27,17 +31,27 @@ public sealed partial class CardSystem : SharedCardSystem
     [Dependency]
     private IStateManager _stateManager = default!;
 
+    [Dependency]
+    private StackSystem _stacks = default!;
+
+    [Dependency]
+    private ItemCounterSystem _counterSystem = default!;
+
+    [Dependency]
+    private IPlayerManager _playerManager = default!;
+
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeLocalEvent<CardsComponent, AppearanceChangeEvent>(OnAppearanceChanged);
         SubscribeNetworkEvent<CardAnimationEvent>(HandleCardAnimation);
-        SubscribeLocalEvent<CardsComponent, DroppedEvent>(OnCardsDropped);
     }
 
-    private void OnCardsDropped(Entity<CardsComponent> ent, ref DroppedEvent args)
+    protected override void OnCardsDropped(Entity<CardsComponent> ent, ref DroppedEvent args)
     {
+        base.OnCardsDropped(ent, ref args);
+
         if (_stateManager.CurrentState is not GameplayStateBase screen)
             return;
 
@@ -103,7 +117,7 @@ public sealed partial class CardSystem : SharedCardSystem
         if (!PrototypeManager.TryIndex(newStackId, out var newStack))
             return EntityUid.Invalid;
 
-        var ent = Spawn(newStack.Spawn, mergeeCoords);
+        var ent = Spawn(newStack.Spawn, TransformSystem.ToMapCoordinates(mergeeCoords));
 
         if (
             !TryComp<CardsComponent>(ent, out var cardsComp)
@@ -140,20 +154,43 @@ public sealed partial class CardSystem : SharedCardSystem
         return ent;
     }
 
-    // Position of cards in fan
-    // Semi-circle shifted down to centre it
+    /// <summary>
+    /// Calculates the local position of a card on a fanned arc, given its angle from center.
+    /// </summary>
+    /// <param name="angle">The angle of the card along the fan, in radians, where 0 is centered.</param>
+    /// <param name="radius">The radius of the fan's arc.</param>
+    /// <returns>The local position offset for the card.</returns>
     public static Vector2 FanPosition(double angle, float radius) =>
         new((float)Math.Sin(angle) * radius, (float)Math.Cos(angle) * radius - radius * (3f / 4f));
 
-    // Radius is 0 when one card so individual cards can't be fanned
+    /// <summary>
+    /// Calculates the radius of the fan arc based on the number of cards.
+    /// </summary>
+    /// <param name="count">The total number of cards in the fan.</param>
+    /// <returns>The fan radius, or 0 if there is only one card, since a single card cannot be fanned.</returns>
     public static float FanRadius(int count) => count <= 1 ? 0f : (float)Math.Sqrt(count / 20f);
 
+    /// <summary>
+    /// Calculates the position and rotation of a card at a given index within a fanned hand,
+    /// arranging cards in a semi-circle from left to right.
+    /// </summary>
+    /// <param name="inx">The zero-based index of the card within the hand.</param>
+    /// <param name="count">The total number of cards in the hand.</param>
+    /// <returns>A tuple containing the card's local position and rotation.</returns>
     public static (Vector2, Angle) GetCardPosRot(int inx, int count)
     {
         var radius = FanRadius(count);
         return GetCardPosRot(inx, count, radius);
     }
 
+    /// <summary>
+    /// Calculates the position and rotation of a card at a given index within a fanned hand,
+    /// arranging cards in a semi-circle from left to right.
+    /// </summary>
+    /// <param name="inx">The zero-based index of the card within the hand.</param>
+    /// <param name="count">The total number of cards in the hand.</param>
+    /// <param name="radius">The radius of the fan's arc.</param>
+    /// <returns>A tuple containing the card's local position and rotation.</returns>
     public static (Vector2, Angle) GetCardPosRot(int inx, int count, float radius)
     {
         // Semi-circle from left to right
@@ -163,7 +200,7 @@ public sealed partial class CardSystem : SharedCardSystem
         return (position, rotation);
     }
 
-    // Radius is 0 when one card so individual cards can't be fanned
+    // Layer names for each card
     private static (string Base, string LayerOne, string LayerTwo) CardLayers(int i) =>
         ($"card_{i}_base", $"card_{i}_layerOne", $"card_{i}_layerTwo");
 
@@ -175,13 +212,46 @@ public sealed partial class CardSystem : SharedCardSystem
         // It will have a max of MaxFanned when fanned
         if (!Appearance.TryGetData<CardListVisualState>(uid, CardVisuals.CardList, out var visualState, args.Component))
             visualState = new CardListVisualState(new List<CardData>(), 0, 0);
-
-        if (!TryComp<SpriteComponent>(uid, out var sprite) || !TryComp<CardsComponent>(uid, out var cards))
+        if (
+            !TryComp<SpriteComponent>(uid, out var sprite)
+            || !TryComp<CardsComponent>(uid, out var cards)
+            || !TryComp<StackComponent>(uid, out var stack)
+            || !TryComp<TransformComponent>(uid, out var xform)
+        )
             return;
+
+        if (
+            HasComp<MobStateComponent>(xform.ParentUid)
+            && xform.ParentUid != _playerManager.LocalSession?.AttachedEntity
+        )
+        {
+            if (flipped)
+                visualState.Start = 0;
+            flipped = false;
+        }
 
         var count = visualState.Count;
         var radius = FanRadius(count);
+        _sprite.LayerMapReserve((uid, sprite), "base_2");
+        _sprite.LayerSetVisible((uid, sprite), "base_2", false);
+        // amount of cards in the right stack when fanned
+        var hiddenCount = flipped ? component.Cards.Count - (visualState.Start + visualState.Count) : visualState.Start;
 
+        if (hiddenCount > 0)
+        {
+            var maxCount = _stacks.GetMaxCount(stack);
+            _stacks.ApplyLayerFunction((uid, stack), ref hiddenCount, ref maxCount);
+            _sprite.LayerSetVisible((uid, sprite), "base_2", true);
+            _counterSystem.ProcessOpaqueSprite(
+                uid,
+                "base_2",
+                hiddenCount,
+                maxCount,
+                stack.LayerStates,
+                false,
+                sprite: args.Sprite
+            );
+        }
         // Delete all layers which are not used here
         // Assumes that all layers will have the card before it have a layer
         // If it runs into a layer which doesn't exists it assumes no more later layers will exists
@@ -230,10 +300,13 @@ public sealed partial class CardSystem : SharedCardSystem
             // Moves the stack texture below the left most card
             if (i == 0)
                 TransformLayer("base", position, rotation, (uid, sprite));
+
+            if (i == count - 1)
+                TransformLayer("base_2", position, rotation, (uid, sprite));
         }
     }
 
-    public void BuildCard(
+    private void BuildCard(
         CardPrototype prototype,
         string baseLayer,
         string baseSprite,
@@ -247,7 +320,7 @@ public sealed partial class CardSystem : SharedCardSystem
         BuildLayer(layerTwo, prototype.LayerTwoState, prototype.LayerTwoColor, sprite);
     }
 
-    public void BuildLayer(string layer, string? layerState, Color? layerColor, Entity<SpriteComponent?> sprite)
+    private void BuildLayer(string layer, string? layerState, Color? layerColor, Entity<SpriteComponent?> sprite)
     {
         _sprite.LayerSetVisible(sprite, layer, true);
         _sprite.LayerSetRsiState(sprite, layer, layerState);
@@ -255,7 +328,7 @@ public sealed partial class CardSystem : SharedCardSystem
             _sprite.LayerSetColor(sprite, layer, layerColor.Value);
     }
 
-    public void TransformLayer(string layer, Vector2 movement, Angle rotation, Entity<SpriteComponent?> sprite)
+    private void TransformLayer(string layer, Vector2 movement, Angle rotation, Entity<SpriteComponent?> sprite)
     {
         _sprite.LayerSetOffset(sprite, layer, movement);
         _sprite.LayerSetRotation(sprite, layer, rotation);

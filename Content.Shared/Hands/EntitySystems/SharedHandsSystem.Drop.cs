@@ -2,7 +2,6 @@ using System.Numerics;
 using Content.Shared.Database;
 using Content.Shared.Hands.Components;
 using Content.Shared.Interaction;
-using Content.Shared.Interaction.Events;
 using Content.Shared.Inventory.VirtualItem;
 using Content.Shared.Storage.Components;
 using Content.Shared.Tag;
@@ -241,7 +240,6 @@ public abstract partial class SharedHandsSystem
 
         if (TerminatingOrDeleted(ent) || TerminatingOrDeleted(entity))
             return;
-
 
         if (!ContainerSystem.Remove(entity.Value, container))
         {

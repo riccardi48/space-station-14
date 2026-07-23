@@ -1,8 +1,11 @@
 using System.Linq;
+using Content.Shared.Examine;
+using Content.Shared.Hands;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Random.Helpers;
 using Content.Shared.Verbs;
+using Robust.Shared.Random;
 
 namespace Content.Shared.Cards;
 
@@ -13,6 +16,9 @@ public abstract partial class SharedCardSystem
         SubscribeLocalEvent<CardsComponent, ActivateInWorldEvent>(OnCardsActivate);
         SubscribeLocalEvent<CardsComponent, UseInHandEvent>(OnCardsUse);
         SubscribeLocalEvent<CardsComponent, GetVerbsEvent<AlternativeVerb>>(OnCardsAlternativeInteract);
+        SubscribeLocalEvent<CardsComponent, ExaminedEvent>(OnCardsExamined);
+        SubscribeLocalEvent<CardsComponent, HandSelectedEvent>(OnPickupEvent);
+        SubscribeLocalEvent<CardsComponent, DroppedEvent>(OnCardsDropped);
     }
 
     // When 'E' pressed in the world
@@ -47,6 +53,29 @@ public abstract partial class SharedCardSystem
         {
             TryFlipCards(ent);
         }
+    }
+
+    private void OnCardsExamined(Entity<CardsComponent> ent, ref ExaminedEvent args)
+    {
+        // Can only see top card if the deck is flipped
+        if (!args.IsInDetailsRange || !ent.Comp.Flipped)
+            return;
+
+        var cards = GetCardListVisualState(ent.Comp);
+        var cardName = (string)cards.CardList.Last().CardId;
+        args.PushMarkup(
+            Loc.GetString("comp-cards-examine-detail", ("card", Loc.GetString(cardName.Replace('_', '-'))))
+        );
+    }
+
+    private void OnPickupEvent(Entity<CardsComponent> ent, ref HandSelectedEvent args)
+    {
+        UpdateVisualState(ent);
+    }
+
+    protected virtual void OnCardsDropped(Entity<CardsComponent> ent, ref DroppedEvent args)
+    {
+        UpdateVisualState(ent);
     }
 
     private void OnCardsAlternativeInteract(Entity<CardsComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
@@ -116,7 +145,7 @@ public abstract partial class SharedCardSystem
                 new AlternativeVerb
                 {
                     Text = Loc.GetString("comp-cards-random-card"),
-                    Act = () => TryTakeCard(ent, user, randomIndex, out _),
+                    Act = () => TryTakeCard(ent, user, ent.Comp.Cards[randomIndex].CardInx, out _),
                     Priority = -200,
                 }
             );
