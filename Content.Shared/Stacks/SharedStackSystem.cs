@@ -10,8 +10,6 @@ using JetBrains.Annotations;
 using Robust.Shared.GameStates;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Systems;
-using Robust.Shared.Prototypes;
-using Robust.Shared.Timing;
 
 namespace Content.Shared.Stacks;
 
@@ -22,16 +20,16 @@ namespace Content.Shared.Stacks;
 [UsedImplicitly]
 public abstract partial class SharedStackSystem : EntitySystem
 {
-    [Dependency] protected IPrototypeManager _prototype = default!;
     [Dependency] private IViewVariablesManager _vvm = default!;
-    [Dependency] protected SharedAppearanceSystem Appearance = default!;
-    [Dependency] protected SharedHandsSystem Hands = default!;
-    [Dependency] protected SharedTransformSystem Xform = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private EntityLookupSystem _entityLookup = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
-    [Dependency] protected SharedPopupSystem Popup = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedStorageSystem _storage = default!;
     [Dependency] protected IGameTiming _timing = default!;
+
+    [Dependency] private EntityQuery<StackComponent> _stackQuery;
 
     // TODO: These should be in the prototype.
     public static readonly int[] DefaultSplitAmounts = { 1, 5, 10, 20, 30, 50 };
@@ -39,16 +37,6 @@ public abstract partial class SharedStackSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-
-        SubscribeLocalEvent<StackComponent, InteractUsingEvent>(OnStackInteractUsing);
-        SubscribeLocalEvent<StackComponent, ComponentGetState>(OnStackGetState);
-        SubscribeLocalEvent<StackComponent, ComponentHandleState>(OnStackHandleState);
-        SubscribeLocalEvent<StackComponent, ComponentStartup>(OnStackStarted);
-        SubscribeLocalEvent<StackComponent, ExaminedEvent>(OnStackExamined);
-
-        SubscribeLocalEvent<StackComponent, BeforeIngestedEvent>(OnBeforeEaten);
-        SubscribeLocalEvent<StackComponent, IngestedEvent>(OnEaten);
-        SubscribeLocalEvent<StackComponent, GetVerbsEvent<AlternativeVerb>>(OnStackAlternativeInteract);
 
         _vvm.GetTypeHandler<StackComponent>()
             .AddPath(nameof(StackComponent.Count), (_, comp) => comp.Count, SetCount);
@@ -62,12 +50,15 @@ public abstract partial class SharedStackSystem : EntitySystem
             .RemovePath(nameof(StackComponent.Count));
     }
 
+    #region Subscriptions
+
+    [SubscribeLocalEvent]
     private void OnStackInteractUsing(Entity<StackComponent> ent, ref InteractUsingEvent args)
     {
         if (args.Handled)
             return;
 
-        if (!TryComp<StackComponent>(args.Used, out var recipientStack))
+        if (!_stackQuery.TryComp(args.Used, out var recipientStack))
             return;
 
         // Transfer stacks from ground to hand
@@ -89,11 +80,11 @@ public abstract partial class SharedStackSystem : EntitySystem
         switch (transferred)
         {
             case > 0:
-                Popup.PopupClient($"+{transferred}", popupPos, args.User);
+                _popup.PopupCoordinates($"+{transferred}", popupPos, args.User);
 
                 if (GetAvailableSpace(recipientStack) == 0)
                 {
-                    Popup.PopupClient(Loc.GetString("comp-stack-becomes-full"),
+                    _popup.PopupCoordinates(Loc.GetString("comp-stack-becomes-full"),
                         popupPos.Offset(new Vector2(0, -0.5f)),
                         args.User);
                 }
@@ -101,7 +92,7 @@ public abstract partial class SharedStackSystem : EntitySystem
                 break;
 
             case 0 when GetAvailableSpace(recipientStack) == 0:
-                Popup.PopupClient(Loc.GetString("comp-stack-already-full"), popupPos, args.User);
+                _popup.PopupCoordinates(Loc.GetString("comp-stack-already-full"), popupPos, args.User);
                 break;
         }
         if (ent.Comp.AnimatePickup)
@@ -111,21 +102,24 @@ public abstract partial class SharedStackSystem : EntitySystem
         }
     }
 
+    [SubscribeLocalEvent]
     private void OnStackStarted(Entity<StackComponent> ent, ref ComponentStartup args)
     {
         if (!TryComp(ent.Owner, out AppearanceComponent? appearance))
             return;
 
-        Appearance.SetData(ent.Owner, StackVisuals.Actual, ent.Comp.Count, appearance);
-        Appearance.SetData(ent.Owner, StackVisuals.MaxCount, GetMaxCount(ent.Comp), appearance);
-        Appearance.SetData(ent.Owner, StackVisuals.Hide, false, appearance);
+        _appearance.SetData(ent.Owner, StackVisuals.Actual, ent.Comp.Count, appearance);
+        _appearance.SetData(ent.Owner, StackVisuals.MaxCount, GetMaxCount(ent.Comp), appearance);
+        _appearance.SetData(ent.Owner, StackVisuals.Hide, false, appearance);
     }
 
+    [SubscribeLocalEvent]
     private void OnStackGetState(Entity<StackComponent> ent, ref ComponentGetState args)
     {
         args.State = new StackComponentState(ent.Comp.Count, ent.Comp.MaxCountOverride, ent.Comp.Unlimited);
     }
 
+    [SubscribeLocalEvent]
     private void OnStackHandleState(Entity<StackComponent> ent, ref ComponentHandleState args)
     {
         if (args.Current is not StackComponentState cast)
@@ -137,6 +131,7 @@ public abstract partial class SharedStackSystem : EntitySystem
         SetCount(ent.AsNullable(), cast.Count);
     }
 
+    [SubscribeLocalEvent]
     private void OnStackExamined(Entity<StackComponent> ent, ref ExaminedEvent args)
     {
         if (!args.IsInDetailsRange)
@@ -150,6 +145,7 @@ public abstract partial class SharedStackSystem : EntitySystem
         );
     }
 
+    [SubscribeLocalEvent]
     private void OnBeforeEaten(Entity<StackComponent> eaten, ref BeforeIngestedEvent args)
     {
         if (args.Cancelled)
@@ -182,11 +178,13 @@ public abstract partial class SharedStackSystem : EntitySystem
         args.Cancelled = true;
     }
 
+    [SubscribeLocalEvent]
     private void OnEaten(Entity<StackComponent> eaten, ref IngestedEvent args)
     {
         ReduceCount(eaten.AsNullable(), 1);
     }
 
+    [SubscribeLocalEvent]
     private void OnStackAlternativeInteract(Entity<StackComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract || args.Hands == null)
@@ -206,7 +204,7 @@ public abstract partial class SharedStackSystem : EntitySystem
                 Category = VerbCategory.Split,
                 Act = () => UserSplit(ent, user, amount),
                 // we want to sort by size, not alphabetically by the verb text.
-                Priority = priority
+                Priority = priority,
             };
 
             priority--;
@@ -214,16 +212,25 @@ public abstract partial class SharedStackSystem : EntitySystem
             args.Verbs.Add(verb);
         }
 
+        var half = (ent.Comp.Count + 1) / 2;
         AlternativeVerb halve = new()
         {
             Text = Loc.GetString("comp-stack-split-halve"),
             Category = VerbCategory.Split,
-            Act = () => UserSplit(ent, user, ent.Comp.Count / 2),
+            Act = () => UserSplit(ent, user, half),
             Priority = ent.Comp.HalfOnAltInteract ? 1 : priority - 1,
         };
         args.Verbs.Add(halve);
     }
 
+    #endregion
+
+    /// <summary>
+    ///     Splits a stack and either mergers the stack into the hand of the user of picks it up into the hand of the user
+    /// </summary>
+    /// <param name="stack"> Stack which is to be split from </param>
+    /// <param name="user"> The user who is trying to split the stack </param>
+    /// <param name="amount"> Amount to try and split the stack. Will not always be the amount moved </param>
     /// <remarks>
     ///     OnStackAlternativeInteract() was moved to shared in order to faciliate prediction of stack splitting verbs.
     ///     However, prediction of interacitons with spawned entities is non-functional (or so i'm told)
@@ -231,24 +238,49 @@ public abstract partial class SharedStackSystem : EntitySystem
     ///     This empty virtual method allows for UserSplit() to be called on the server from the client.
     ///     When prediction is improved, those two methods should be moved to shared, in order to predict the splitting itself (not just the verbs)
     /// </remarks>
-    public void UserSplit(Entity<StackComponent> stack, Entity<TransformComponent?> user, int amount)
+    public void UserSplit(Entity<StackComponent> stack, EntityUid user, int amount)
     {
-        if (!Resolve(user.Owner, ref user.Comp, false))
-            return;
-
         if (amount <= 0)
+        {
+            _popup.PopupCursor(Loc.GetString("comp-stack-split-too-small"), user, PopupType.Medium);
+            return;
+        }
+
+        // Tries to merge stack with a stack in hand.
+        if (_hands.TryGetActiveItem(user, out var merger)
+            && TryMergeStacks(stack.AsNullable(), merger.Value, out _, amount: amount))
+        {
+            _popup.PopupCursor(Loc.GetString("comp-stack-split"), user);
+            return;
+        }
+
+        // If this is effectively just picking up the stack, it just picks up the stack.
+        if (stack.Comp.Count <= amount)
+        {
+            // No AnimatePickup passed as this is a normal pickup.
+            _hands.PickupOrDrop(user, stack.Owner);
+            return;
+        }
+
+        if (Split(stack.AsNullable(), amount, new EntityCoordinates(user, Vector2.Zero), user: user) is not { } split)
             return;
 
-        if (Hands.TryGetActiveItem(user.Owner, out var recipient)
-            && TryComp<StackComponent>(recipient, out var recipientStack)
-            && TryMergeStacks((stack.Owner, stack.Comp), (recipient.Value, recipientStack), out var transferred, amount: amount))
-            return;
+        _hands.PickupOrDrop(user, split, animate: stack.Comp.AnimatePickup);
+        _popup.PopupCursor(Loc.GetString("comp-stack-split"), user);
+    }
 
-        if (Split(stack.AsNullable(), amount, new EntityCoordinates(user.Owner, Vector2.Zero)) is not { } split)
-            return;
-
-        Hands.PickupOrDrop(user.Owner, split);
-        Popup.PopupCursor(Loc.GetString("comp-stack-split"), user.Owner);
+    /// <summary>
+    /// Spawns a new entity and moves an amount to it from the stack.
+    /// Moves nothing if amount is greater than ent's stack count.
+    /// </summary>
+    /// <param name="ent">Entity to split in a new stack.</param>
+    /// <param name="amount">How much to move to the new entity.</param>
+    /// <param name="spawnPosition">Where to spawn the new stack</param>
+    /// <returns>Null if StackComponent doesn't resolve, or amount to move is greater than ent has available.</returns>
+    [PublicAPI]
+    public virtual EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition, EntityUid? user = null)
+    {
+        return null;
     }
 
     /// <summary>

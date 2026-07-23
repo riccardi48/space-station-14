@@ -1,3 +1,4 @@
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Popups;
 using Content.Shared.Stacks;
 using JetBrains.Annotations;
@@ -13,27 +14,26 @@ namespace Content.Server.Stack
     [UsedImplicitly]
     public sealed partial class StackSystem : SharedStackSystem
     {
+        [Dependency] private SharedHandsSystem _hands = default!;
+        [Dependency] private SharedPopupSystem _popup = default!;
+        [Dependency] private SharedTransformSystem _transform = default!;
+
+        [Dependency] private EntityQuery<StackComponent> _stackQuery;
+
         #region Spawning
 
-        /// <summary>
-        /// Spawns a new entity and moves an amount to it from the stack.
-        /// Moves nothing if amount is greater than ent's stack count.
-        /// </summary>
-        /// <param name="ent">Entity to split in a new stack.</param>
-        /// <param name="amount">How much to move to the new entity.</param>
-        /// <param name="spawnPosition">Where to spawn the new stack</param>
-        /// <returns>Null if StackComponent doesn't resolve, or amount to move is greater than ent has available.</returns>
+        /// <inheritdoc />
         [PublicAPI]
-        public override EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition)
+        public override EntityUid? Split(Entity<StackComponent?> ent, int amount, EntityCoordinates spawnPosition, EntityUid? user = null)
         {
-            if (!Resolve(ent.Owner, ref ent.Comp))
+            if (!_stackQuery.Resolve(ent.Owner, ref ent.Comp))
                 return null;
 
             // Try to remove the amount of things we want to split from the original stack...
             if (!TryUse(ent, amount))
                 return null;
 
-            if (!_prototype.Resolve(ent.Comp.StackTypeId, out var stackType))
+            if (!ProtoMan.Resolve(ent.Comp.StackTypeId, out var stackType))
                 return null;
 
             // Set the output parameter in the event instance to the newly split stack.
@@ -41,13 +41,13 @@ namespace Content.Server.Stack
             Xform.SetParent(newEntity, spawnPosition.EntityId);
 
             // There should always be a StackComponent
-            var stackComp = Comp<StackComponent>(newEntity);
+            var stackComp = _stackQuery.Comp(newEntity);
 
             SetCount((newEntity, stackComp), amount);
             stackComp.Unlimited = false; // Don't let people dupe unlimited stacks
             Dirty(newEntity, stackComp);
 
-            var ev = new StackSplitEvent(newEntity);
+            var ev = new StackSplitEvent(newEntity, user);
             RaiseLocalEvent(ent, ref ev);
 
             return newEntity;
@@ -72,7 +72,7 @@ namespace Content.Server.Stack
         [PublicAPI]
         public EntityUid SpawnAtPosition(int count, ProtoId<StackPrototype> id, EntityCoordinates spawnPosition)
         {
-            var proto = _prototype.Index(id);
+            var proto = ProtoMan.Index(id);
             return SpawnAtPosition(count, proto, spawnPosition);
         }
 
@@ -144,7 +144,7 @@ namespace Content.Server.Stack
                                                        int amount,
                                                        EntityCoordinates spawnPosition)
         {
-            var stackProto = _prototype.Index(stackId);
+            var stackProto = ProtoMan.Index(stackId);
             return SpawnMultipleAtPosition(stackProto.Spawn,
                                             CalculateSpawns(stackProto, amount),
                                             spawnPosition);
@@ -166,7 +166,7 @@ namespace Content.Server.Stack
         [PublicAPI]
         public EntityUid SpawnNextToOrDrop(int amount, ProtoId<StackPrototype> id, EntityUid source)
         {
-            var proto = _prototype.Index(id);
+            var proto = ProtoMan.Index(id);
             return SpawnNextToOrDrop(amount, proto, source);
         }
 
@@ -233,7 +233,7 @@ namespace Content.Server.Stack
                                                          int amount,
                                                          EntityUid target)
         {
-            var stackProto = _prototype.Index(stackId);
+            var stackProto = ProtoMan.Index(stackId);
             return SpawnMultipleNextToOrDrop(stackProto.Spawn,
                                              CalculateSpawns(stackProto, amount),
                                              target);

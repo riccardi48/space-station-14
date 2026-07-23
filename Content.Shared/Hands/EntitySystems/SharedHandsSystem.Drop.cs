@@ -228,7 +228,7 @@ public abstract partial class SharedHandsSystem
         bool doDropInteraction = true,
         bool log = true,
         EntityCoordinates? targetDropLocation = null
-        )
+    )
     {
         if (!Resolve(ent, ref ent.Comp, false))
             return;

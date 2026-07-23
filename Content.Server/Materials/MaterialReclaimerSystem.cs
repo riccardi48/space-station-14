@@ -19,7 +19,6 @@ using Content.Shared.Repairable;
 using Content.Shared.Stacks;
 using Robust.Server.GameObjects;
 using Robust.Shared.Player;
-using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
 namespace Content.Server.Materials;
@@ -27,7 +26,6 @@ namespace Content.Server.Materials;
 /// <inheritdoc/>
 public sealed partial class MaterialReclaimerSystem : SharedMaterialReclaimerSystem
 {
-    [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private AppearanceSystem _appearance = default!;
     [Dependency] private GhostSystem _ghostSystem = default!;
     [Dependency] private MaterialStorageSystem _materialStorage = default!;
@@ -171,6 +169,8 @@ public sealed partial class MaterialReclaimerSystem : SharedMaterialReclaimerSys
                 SpawnChemicalsFromComposition(uid, item, completion, true, component, xform);
         }
 
+        var eventArgs = new DestructionEventArgs();
+        RaiseLocalEvent(item, eventArgs);
         QueueDel(item);
     }
 
@@ -219,10 +219,14 @@ public sealed partial class MaterialReclaimerSystem : SharedMaterialReclaimerSys
         TransformComponent? xform = null,
         PhysicalCompositionComponent? composition = null)
     {
-        if (!Resolve(reclaimer, ref reclaimerComponent, ref xform) || reclaimerComponent.SolutionContainerId == null)
+        if (!Resolve(reclaimer, ref reclaimerComponent, ref xform))
             return;
 
         efficiency *= reclaimerComponent.Efficiency;
+
+        // Solution will be empty, nothing to do.
+        if (efficiency <= 0)
+            return;
 
         var totalChemicals = new Solution();
 
@@ -242,7 +246,7 @@ public sealed partial class MaterialReclaimerSystem : SharedMaterialReclaimerSys
             // Are we a recycler? Only use drainable solution.
             if (_solutionContainer.TryGetDrainableSolution(item, out _, out var drainableSolution))
             {
-                totalChemicals.AddSolution(drainableSolution, _prototype);
+                totalChemicals.AddSolution(drainableSolution, ProtoMan);
             }
         }
         else
@@ -250,13 +254,17 @@ public sealed partial class MaterialReclaimerSystem : SharedMaterialReclaimerSys
             // Are we an industrial reagent grinder? Use extractable solution.
             if (_solutionContainer.TryGetExtractableSolution(item, out _, out var extractableSolution))
             {
-                totalChemicals.AddSolution(extractableSolution, _prototype);
+                totalChemicals.AddSolution(extractableSolution, ProtoMan);
             }
         }
 
-        if (!_solutionContainer.TryGetSolution(reclaimer, reclaimerComponent.SolutionContainerId, out var outputSolution) ||
-            !_solutionContainer.TryTransferSolution(outputSolution.Value, totalChemicals, totalChemicals.Volume) ||
-            totalChemicals.Volume > 0)
+        // Transfer or spill the solution if there's anything to move.
+        if (totalChemicals.Volume <= 0)
+            return;
+
+        if (reclaimerComponent.SolutionContainerId == null ||
+            !_solutionContainer.TryGetSolution(reclaimer, reclaimerComponent.SolutionContainerId, out var outputSolution) ||
+            !_solutionContainer.TryTransferSolution(outputSolution.Value, totalChemicals, totalChemicals.Volume))
         {
             _puddle.TrySpillAt(reclaimer, totalChemicals, out _, sound, transformComponent: xform);
         }
