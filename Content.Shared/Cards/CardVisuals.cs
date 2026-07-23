@@ -67,19 +67,21 @@ public abstract partial class SharedCardSystem
         Entity<CardsComponent> merger,
         Entity<CardsComponent> mergee,
         int delta,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     )
     {
         // Plays animation for a split or merge where the cards taken are from the top or bottom
         var selected = MovedCards(mergee.Comp, delta);
-        PlayCardAnimation(merger, mergee, selected, playOnUser: playOnUser);
+        PlayCardAnimation(merger, mergee, selected, playOnUser: playOnUser, blackListUser: blackListUser);
     }
 
     protected void PlayCardTakeAnimation(
         Entity<CardsComponent> merger,
         Entity<CardsComponent> mergee,
         int cardInx,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     )
     {
         // Plays animation for a split or merge where the cards taken are from somewhere in the deck
@@ -87,14 +89,15 @@ public abstract partial class SharedCardSystem
         if (!card.HasValue)
             return;
         List<CardData> selected = new List<CardData> { card.Value };
-        PlayCardAnimation(merger, mergee, selected, playOnUser: playOnUser);
+        PlayCardAnimation(merger, mergee, selected, playOnUser: playOnUser, blackListUser: blackListUser);
     }
 
     private void PlayCardAnimation(
         Entity<CardsComponent> merger,
         Entity<CardsComponent> mergee,
         List<CardData> selected,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     )
     {
         // Animation function needs to not send any entityUid information as the entity may have been merged and deleted on other clients when played
@@ -109,7 +112,8 @@ public abstract partial class SharedCardSystem
             xform.LocalRotation,
             originalStackComp.StackTypeId,
             selected,
-            playOnUser: playOnUser
+            playOnUser: playOnUser,
+            blackListUser: blackListUser
         );
     }
 
@@ -120,7 +124,8 @@ public abstract partial class SharedCardSystem
         Angle mergeeRotation,
         ProtoId<StackPrototype> stackId,
         List<CardData> selected,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     );
 }
 

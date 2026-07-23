@@ -52,7 +52,8 @@ public sealed partial class CardSystem : SharedCardSystem
         Angle mergeeRotation,
         ProtoId<StackPrototype> stackId,
         List<CardData> selected,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     )
     {
         var ev = new CardAnimationEvent(
@@ -67,7 +68,7 @@ public sealed partial class CardSystem : SharedCardSystem
         // Do play it for systems which are not predicted i.e. splitting stacks
         var filter = Filter
             .Pvs(mergerCoords)
-            .RemoveWhereAttachedEntity(e => !playOnUser && (e == mergerCoords.EntityId || e == mergeeCoords.EntityId));
+            .RemoveWhereAttachedEntity(e => !playOnUser && (e == blackListUser || e == mergerCoords.EntityId || e == mergeeCoords.EntityId));
         RaiseNetworkEvent(ev, filter);
     }
 }

@@ -92,7 +92,8 @@ public sealed partial class CardSystem : SharedCardSystem
         Angle mergeeRotation,
         ProtoId<StackPrototype> newStackId,
         List<CardData> selected,
-        bool playOnUser = false
+        bool playOnUser = false,
+        EntityUid? blackListUser = null
     )
     {
         if (!Timing.IsFirstTimePredicted)

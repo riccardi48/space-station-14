@@ -106,12 +106,16 @@ public abstract partial class SharedCardSystem : EntitySystem
         // playOnUser allows the server to give the animation to the client
         // If using a not predicted system this is true
         // When a card is thrown it must be false though
-        PlayCardDrawAnimation(
-            (args.NewId, splitComp),
-            ent,
-            delta,
-            playOnUser: Hands.GetActiveItem(args.User ?? EntityUid.Invalid) != ent.Owner
-        );
+        if (args.User != null)
+        {
+            PlayCardDrawAnimation(
+                (args.NewId, splitComp),
+                ent,
+                delta,
+                playOnUser: true,
+                blackListUser: args.User
+            );
+        }
         TakeFromDeck(splitComp, ent.Comp, delta);
         // Copy state over to new entity
         splitComp.Flipped = ent.Comp.Flipped;
