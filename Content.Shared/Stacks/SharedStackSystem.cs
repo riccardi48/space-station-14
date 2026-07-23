@@ -27,6 +27,7 @@ public abstract partial class SharedStackSystem : EntitySystem
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedStorageSystem _storage = default!;
+
     [Dependency] private EntityQuery<StackComponent> _stackQuery;
 
     // TODO: These should be in the prototype.
