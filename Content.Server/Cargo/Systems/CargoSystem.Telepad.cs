@@ -105,7 +105,7 @@ public sealed partial class CargoSystem
             }
 
             var currentOrder = comp.CurrentOrders.First();
-            if (FulfillOrder(currentOrder, currentOrder.Account, xform.Coordinates, comp.PrinterOutput))
+            if (FulfillOrder(currentOrder, xform.Coordinates, comp.PrinterOutput))
             {
                 var teleportSound = comp.TeleportSound;
                 var audioParams = teleportSound?.Params ?? AudioParams.Default;
@@ -151,7 +151,7 @@ public sealed partial class CargoSystem
 
         foreach (var order in ent.Comp.CurrentOrders)
         {
-            TryFulfillOrder((station, data), console.Value.Comp.Account, order, db);
+            TryFulfillOrder((station, data), order, db);
         }
     }
 

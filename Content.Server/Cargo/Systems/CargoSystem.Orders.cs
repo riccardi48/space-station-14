@@ -70,7 +70,7 @@ public sealed partial class CargoSystem
         var orderId = GenerateOrderId(orderDatabase);
         var data = new CargoOrderData(orderId, product, slip.OrderQuantity, slip.Requester, slip.Reason, slip.Account);
 
-        if (!TryAddOrder(stationUid.Value, ent.Comp.Account, data, orderDatabase))
+        if (!TryAddOrder(stationUid.Value, data, orderDatabase))
         {
             PlayDenySound(ent);
             return;
@@ -170,7 +170,7 @@ public sealed partial class CargoSystem
 
         // Find our order again. It might have been dispatched or approved already
         var orderId = args.OrderId;
-        var order = orderDatabase.Orders[ent.Comp.Account].Find(order => orderId == order.OrderId && !order.Approved);
+        var order = orderDatabase.Orders.Find(order => orderId == order.OrderId && !order.Approved);
         if (order == null || !ProtoMan.Resolve(order.Account, out var account))
         {
             return;
@@ -229,7 +229,7 @@ public sealed partial class CargoSystem
 
         if (!ev.Handled)
         {
-            ev.FulfillmentEntity = TryFulfillOrder((station.Value, stationData), order.Account, order, orderDatabase);
+            ev.FulfillmentEntity = TryFulfillOrder((station.Value, stationData), order, orderDatabase);
 
             if (ev.FulfillmentEntity == null)
             {
@@ -278,14 +278,13 @@ public sealed partial class CargoSystem
             $"{ToPrettyString(player):user} approved order [orderId:{order.OrderId}, quantity:{order.OrderQuantity}, product:{order.Product}, requester:{order.Requester}, reason:{order.Reason}] on account {order.Account} with balance at {accountBalance}"
         );
 
-        orderDatabase.Orders[ent.Comp.Account].Remove(order);
+        orderDatabase.Orders.Remove(order);
         UpdateBankAccount((station.Value, bank), -cost, order.Account);
         UpdateOrders(station.Value);
     }
 
     private EntityUid? TryFulfillOrder(
         Entity<StationDataComponent> stationData,
-        ProtoId<CargoAccountPrototype> account,
         CargoOrderData order,
         StationCargoOrderDatabaseComponent orderDatabase
     )
@@ -309,7 +308,7 @@ public sealed partial class CargoSystem
             {
                 var coordinates = new EntityCoordinates(trade, pad.Transform.LocalPosition);
 
-                if (!FulfillOrder(order, account, coordinates, orderDatabase.PrinterOutput))
+                if (!FulfillOrder(order, coordinates, orderDatabase.PrinterOutput))
                     continue;
 
                 tradeDestination = trade;
@@ -350,10 +349,7 @@ public sealed partial class CargoSystem
         if (!TryComp<StationBankAccountComponent>(station, out var bank))
             return;
 
-        var targetAccount =
-            ent.Comp.Mode == CargoOrderConsoleMode.SendToPrimary ? bank.PrimaryAccount : ent.Comp.Account;
-
-        RemoveOrder(station.Value, targetAccount, args.OrderId, orderDatabase);
+        RemoveOrder(station.Value, args.OrderId, orderDatabase);
     }
 
     private void OnAddOrderMessageSlipPrinter(
@@ -429,12 +425,9 @@ public sealed partial class CargoSystem
             return;
         }
 
-        var targetAccount =
-            ent.Comp.Mode == CargoOrderConsoleMode.SendToPrimary ? bank.PrimaryAccount : ent.Comp.Account;
-
         var data = GetOrderData(args, product, GenerateOrderId(orderDatabase), ent.Comp.Account);
 
-        if (!TryAddOrder(stationUid.Value, targetAccount, data, orderDatabase))
+        if (!TryAddOrder(stationUid.Value, data, orderDatabase))
         {
             PlayDenySound(ent);
             return;
@@ -475,7 +468,7 @@ public sealed partial class CargoSystem
             GetOutstandingOrderCount((station!.Value, orderDatabase), console.Account),
             orderDatabase.Capacity,
             GetNetEntity(station.Value),
-            RelevantOrders((station!.Value, orderDatabase), (consoleUid, console)),
+            RelevantOrders((station!.Value, orderDatabase), console.Account),
             GetAvailableProducts((consoleUid, console))
         ));
     }
@@ -485,22 +478,20 @@ public sealed partial class CargoSystem
     /// </summary>
     private List<CargoOrderData> RelevantOrders(
         Entity<StationCargoOrderDatabaseComponent> station,
-        Entity<CargoOrderConsoleComponent> console
+        ProtoId<CargoAccountPrototype> account
     )
     {
         if (!TryComp<StationBankAccountComponent>(station, out var bank))
             return [];
 
-        var ourOrders = station.Comp.Orders[console.Comp.Account];
+        IEnumerable<CargoOrderData> orders;
 
-        if (console.Comp.Account == bank.PrimaryAccount)
-            return ourOrders;
+        if (account != bank.PrimaryAccount)
+            orders = station.Comp.Orders.Where(order => order.Account == account);
+        else
+            orders = station.Comp.Orders;
 
-        var otherOrders = station
-            .Comp.Orders[bank.PrimaryAccount]
-            .Where(order => order.Account == console.Comp.Account);
-
-        return ourOrders.Concat(otherOrders).ToList();
+        return orders.ToList();
     }
 
     private void PlayDenySound(Entity<CargoOrderConsoleComponent> ent)
@@ -532,7 +523,7 @@ public sealed partial class CargoSystem
         if (!TryComp<StationBankAccountComponent>(station, out var bank))
             return amount;
 
-        foreach (var order in station.Comp.Orders[account])
+        foreach (var order in station.Comp.Orders)
         {
             if (!order.Approved)
                 continue;
@@ -542,7 +533,7 @@ public sealed partial class CargoSystem
         if (account == bank.PrimaryAccount)
             return amount;
 
-        foreach (var order in station.Comp.Orders[bank.PrimaryAccount])
+        foreach (var order in station.Comp.Orders)
         {
             if (order.Account != account || !order.Approved)
                 continue;
@@ -599,18 +590,17 @@ public sealed partial class CargoSystem
         );
 
         // Add it to the list
-        return TryAddOrder(dbUid, account, order, component)
-            && TryFulfillOrder(stationData, account, order, component).HasValue;
+        return TryAddOrder(dbUid, order, component)
+            && TryFulfillOrder(stationData, order, component).HasValue;
     }
 
     private bool TryAddOrder(
         EntityUid dbUid,
-        ProtoId<CargoAccountPrototype> account,
         CargoOrderData data,
         StationCargoOrderDatabaseComponent component
     )
     {
-        component.Orders[account].Add(data);
+        component.Orders.Add(data);
         UpdateOrders(dbUid);
         return true;
     }
@@ -624,15 +614,14 @@ public sealed partial class CargoSystem
 
     public void RemoveOrder(
         EntityUid dbUid,
-        ProtoId<CargoAccountPrototype> account,
         int index,
         StationCargoOrderDatabaseComponent orderDB
     )
     {
-        var sequenceIdx = orderDB.Orders[account].FindIndex(order => order.OrderId == index);
+        var sequenceIdx = orderDB.Orders.FindIndex(order => order.OrderId == index);
         if (sequenceIdx != -1)
         {
-            orderDB.Orders[account].RemoveAt(sequenceIdx);
+            orderDB.Orders.RemoveAt(sequenceIdx);
         }
         UpdateOrders(dbUid);
     }
@@ -647,24 +636,23 @@ public sealed partial class CargoSystem
 
     private static bool PopFrontOrder(
         StationCargoOrderDatabaseComponent orderDB,
-        ProtoId<CargoAccountPrototype> account,
         [NotNullWhen(true)] out CargoOrderData? orderOut
     )
     {
-        var orderIdx = orderDB.Orders[account].FindIndex(order => order.Approved);
+        var orderIdx = orderDB.Orders.FindIndex(order => order.Approved);
         if (orderIdx == -1)
         {
             orderOut = null;
             return false;
         }
 
-        orderOut = orderDB.Orders[account][orderIdx];
+        orderOut = orderDB.Orders[orderIdx];
         orderOut.NumDispatched++;
 
         if (orderOut.NumDispatched >= orderOut.OrderQuantity)
         {
             // Order is complete. Remove from the queue.
-            orderDB.Orders[account].RemoveAt(orderIdx);
+            orderDB.Orders.RemoveAt(orderIdx);
         }
         return true;
     }
@@ -675,15 +663,14 @@ public sealed partial class CargoSystem
     [PublicAPI]
     private bool FulfillNextOrder(
         StationCargoOrderDatabaseComponent orderDB,
-        ProtoId<CargoAccountPrototype> account,
         EntityCoordinates spawn,
         string? paperProto
     )
     {
-        if (!PopFrontOrder(orderDB, account, out var order))
+        if (!PopFrontOrder(orderDB, out var order))
             return false;
 
-        return FulfillOrder(order, account, spawn, paperProto);
+        return FulfillOrder(order, spawn, paperProto);
     }
 
     /// <summary>
@@ -691,7 +678,6 @@ public sealed partial class CargoSystem
     /// </summary>
     private bool FulfillOrder(
         CargoOrderData order,
-        ProtoId<CargoAccountPrototype> account,
         EntityCoordinates spawn,
         string? paperProto
     )
@@ -736,7 +722,7 @@ public sealed partial class CargoSystem
             var val = Loc.GetString("cargo-console-paper-print-name", ("orderNumber", order.OrderId));
             _metaSystem.SetEntityName(printed, val);
 
-            var accountProto = ProtoMan.Index(account);
+            var accountProto = ProtoMan.Index(order.Account);
             _paperSystem.SetContent(
                 (printed, paper),
                 Loc.GetString(
