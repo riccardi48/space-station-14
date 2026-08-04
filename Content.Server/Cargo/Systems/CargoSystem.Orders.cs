@@ -478,7 +478,8 @@ public sealed partial class CargoSystem
     /// </summary>
     private List<CargoOrderData> RelevantOrders(
         Entity<StationCargoOrderDatabaseComponent> station,
-        ProtoId<CargoAccountPrototype> account
+        ProtoId<CargoAccountPrototype> account,
+        bool? approved = null
     )
     {
         if (!TryComp<StationBankAccountComponent>(station, out var bank))
@@ -490,8 +491,7 @@ public sealed partial class CargoSystem
             orders = station.Comp.Orders.Where(order => order.Account == account);
         else
             orders = station.Comp.Orders;
-
-        return orders.ToList();
+        return orders.Where(order => approved == null || order.Approved == approved).ToList();
     }
 
     private void PlayDenySound(Entity<CargoOrderConsoleComponent> ent)
@@ -518,29 +518,7 @@ public sealed partial class CargoSystem
         ProtoId<CargoAccountPrototype> account
     )
     {
-        var amount = 0;
-
-        if (!TryComp<StationBankAccountComponent>(station, out var bank))
-            return amount;
-
-        foreach (var order in station.Comp.Orders)
-        {
-            if (!order.Approved)
-                continue;
-            amount += order.OrderQuantity - order.NumDispatched;
-        }
-
-        if (account == bank.PrimaryAccount)
-            return amount;
-
-        foreach (var order in station.Comp.Orders)
-        {
-            if (order.Account != account || !order.Approved)
-                continue;
-            amount += order.OrderQuantity - order.NumDispatched;
-        }
-
-        return amount;
+        return RelevantOrders(station, account, approved: true).Sum(order => order.OrderQuantity - order.NumDispatched);
     }
 
     /// <summary>
