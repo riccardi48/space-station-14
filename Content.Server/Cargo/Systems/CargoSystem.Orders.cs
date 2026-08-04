@@ -634,45 +634,6 @@ public sealed partial class CargoSystem
         component.Orders.Clear();
     }
 
-    private static bool PopFrontOrder(
-        StationCargoOrderDatabaseComponent orderDB,
-        [NotNullWhen(true)] out CargoOrderData? orderOut
-    )
-    {
-        var orderIdx = orderDB.Orders.FindIndex(order => order.Approved);
-        if (orderIdx == -1)
-        {
-            orderOut = null;
-            return false;
-        }
-
-        orderOut = orderDB.Orders[orderIdx];
-        orderOut.NumDispatched++;
-
-        if (orderOut.NumDispatched >= orderOut.OrderQuantity)
-        {
-            // Order is complete. Remove from the queue.
-            orderDB.Orders.RemoveAt(orderIdx);
-        }
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to fulfill the next outstanding order.
-    /// </summary>
-    [PublicAPI]
-    private bool FulfillNextOrder(
-        StationCargoOrderDatabaseComponent orderDB,
-        EntityCoordinates spawn,
-        string? paperProto
-    )
-    {
-        if (!PopFrontOrder(orderDB, out var order))
-            return false;
-
-        return FulfillOrder(order, spawn, paperProto);
-    }
-
     /// <summary>
     /// Fulfills the specified cargo order and spawns paper attached to it.
     /// </summary>
