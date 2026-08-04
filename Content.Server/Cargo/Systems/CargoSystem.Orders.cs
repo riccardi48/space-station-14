@@ -94,10 +94,8 @@ public sealed partial class CargoSystem
         {
             OnInteractUsingCash(ent, ref args);
         }
-        else if (
-            TryComp<CargoSlipComponent>(args.Used, out var slip)
-            && ent.Comp.Mode == CargoOrderConsoleMode.DirectOrder
-        )
+        else if (ent.Comp.Mode == CargoOrderConsoleMode.DirectOrder
+            && TryComp<CargoSlipComponent>(args.Used, out var slip))
         {
             OnInteractUsingSlip(ent, ref args, slip);
         }
@@ -172,9 +170,7 @@ public sealed partial class CargoSystem
         var orderId = args.OrderId;
         var order = orderDatabase.Orders.Find(order => orderId == order.OrderId && !order.Approved);
         if (order == null || !ProtoMan.Resolve(order.Account, out var account))
-        {
             return;
-        }
 
         // Invalid order
         if (!ProtoMan.Resolve(order.Product, out var product))
@@ -286,12 +282,12 @@ public sealed partial class CargoSystem
         foreach (var trade in GetTradeStations(stationData))
         {
             var tradePads = GetCargoPallets(trade, BuySellType.Buy);
-            _random.Shuffle(tradePads);
 
             var freePads = GetFreeCargoPallets(trade, tradePads);
             if (freePads.Count <= order.OrderQuantity) //check if the station has enough free pallets
                 continue;
 
+            _random.Shuffle(freePads);
             foreach (var pad in freePads)
             {
                 var coordinates = new EntityCoordinates(trade, pad.Transform.LocalPosition);
@@ -328,13 +324,9 @@ public sealed partial class CargoSystem
     {
         var station = _station.GetOwningStation(ent.Owner);
 
-        if (ent.Comp.Mode == CargoOrderConsoleMode.PrintSlip)
-            return;
-
-        if (!TryGetOrderDatabase(station, out var orderDatabase))
-            return;
-
-        if (!TryComp<StationBankAccountComponent>(station, out var bank))
+        if (ent.Comp.Mode == CargoOrderConsoleMode.PrintSlip
+            || !TryGetOrderDatabase(station, out var orderDatabase)
+            || !TryComp<StationBankAccountComponent>(station, out var bank))
             return;
 
         RemoveOrder(station.Value, args.OrderId, orderDatabase);
@@ -346,10 +338,8 @@ public sealed partial class CargoSystem
         CargoProductPrototype product
     )
     {
-        if (!ProtoMan.Resolve(ent.Comp.Account, out var account))
-            return;
-
-        if (Timing.CurTime < ent.Comp.NextPrintTime)
+        if (!ProtoMan.Resolve(ent.Comp.Account, out var account)
+            || Timing.CurTime < ent.Comp.NextPrintTime)
             return;
 
         var label = Spawn(account.AcquisitionSlip, Transform(ent.Owner).Coordinates);
@@ -384,27 +374,15 @@ public sealed partial class CargoSystem
     [SubscribeLocalEvent]
     private void OnAddOrderMessage(Entity<CargoOrderConsoleComponent> ent, ref CargoConsoleAddOrderMessage args)
     {
-        if (args.Actor is not { Valid: true } player)
-            return;
-
-        if (args.Amount <= 0)
+        if (args.Actor is not { Valid: true } player || args.Amount <= 0)
             return;
 
         var stationUid = _station.GetOwningStation(ent.Owner);
 
-        if (!TryGetOrderDatabase(stationUid, out var orderDatabase))
-            return;
-
-        if (!TryComp<StationBankAccountComponent>(stationUid, out var bank))
-            return;
-
-        if (!ProtoMan.TryIndex<CargoProductPrototype>(args.CargoProductId, out var product))
-        {
-            Log.Error($"Tried to add invalid cargo product {args.CargoProductId} as order!");
-            return;
-        }
-
-        if (!GetAvailableProducts(ent).Contains(args.CargoProductId))
+        if (!TryGetOrderDatabase(stationUid, out var orderDatabase)
+            || !TryComp<StationBankAccountComponent>(stationUid, out var bank)
+            || !ProtoMan.Resolve<CargoProductPrototype>(args.CargoProductId, out var product)
+            || !GetAvailableProducts(ent).Contains(args.CargoProductId))
             return;
 
         if (ent.Comp.Mode == CargoOrderConsoleMode.PrintSlip)
@@ -440,13 +418,9 @@ public sealed partial class CargoSystem
 
     private void UpdateOrderState(EntityUid consoleUid, EntityUid? station)
     {
-        if (!TryComp<CargoOrderConsoleComponent>(consoleUid, out var console))
-            return;
-
-        if (!TryComp<StationCargoOrderDatabaseComponent>(station, out var orderDatabase))
-            return;
-
-        if (!_uiSystem.HasUi(consoleUid, CargoConsoleUiKey.Orders))
+        if (!TryComp<CargoOrderConsoleComponent>(consoleUid, out var console)
+            || !TryComp<StationCargoOrderDatabaseComponent>(station, out var orderDatabase)
+            || !_uiSystem.HasUi(consoleUid, CargoConsoleUiKey.Orders))
             return;
 
         _uiSystem.SetUiState(consoleUid,
