@@ -1,13 +1,19 @@
 using System.Linq;
 using System.Numerics;
-using Content.Client.Storage.Systems;
+using Content.Client.Gameplay;
 using Content.Shared.Cards;
+using Content.Shared.Interaction.Events;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Rounding;
+using Content.Shared.Storage.EntitySystems;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
 using Robust.Client.Player;
+using Robust.Client.State;
+using Robust.Shared.Map;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
+using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
 
 namespace Content.Client.Cards;
 
@@ -16,7 +22,45 @@ namespace Content.Client.Cards;
 public sealed partial class CardSystem : SharedCardSystem
 {
     [Dependency] private IPlayerManager _playerManager = default!;
+    [Dependency] private IStateManager _stateManager = default!;
     [Dependency] private SpriteSystem _sprite = default!;
+    [Dependency] private SharedStorageSystem _storage = default!;
+
+
+    protected override void OnCardsDropped(Entity<CardsComponent> ent, ref DroppedEvent args)
+    {
+        base.OnCardsDropped(ent, ref args);
+        if (_stateManager.CurrentState is not GameplayStateBase screen)
+            return;
+
+        // Find stack to merge with
+        var uid = screen
+            .GetClickableEntities(Transform(ent).Coordinates)
+            .FirstOrDefault(e => e != ent.Owner && TryComp<CardsComponent>(e, out _));
+
+        if (
+            !TryComp<CardsComponent>(uid, out var recipientCardsComp)
+            || ent.Comp.Flipped != recipientCardsComp.Flipped
+            || !TryMergeDecks(ent.AsNullable(), (uid, recipientCardsComp), out _)
+        )
+            return;
+
+        if (Timing.IsFirstTimePredicted)
+            RaisePredictiveEvent(new CardDropMergeEvent(GetNetEntity(ent.Owner), GetNetEntity(uid)));
+    }
+
+    [SubscribeNetworkEvent]
+    private void HandleCardAnimation(CardAnimationEvent args)
+    {
+        PlayCardAnimation(
+            GetCoordinates(args.DonorCoords),
+            args.DonorRotation,
+            args.DonorFlipped,
+            GetCoordinates(args.RecipientCoords),
+            args.CardStackId,
+            args.Selected
+        );
+    }
 
     [SubscribeLocalEvent]
     private void OnAppearanceChanged(Entity<CardsComponent> ent, ref AppearanceChangeEvent args)
@@ -248,5 +292,70 @@ public sealed partial class CardSystem : SharedCardSystem
         }
 
         actual = newActual;
+    }
+    protected override void PlayCardAnimation(
+        EntityCoordinates donorCoords,
+        Angle donorRotation,
+        bool donorFlipped,
+        EntityCoordinates recipientCoords,
+        ProtoId<CardStackPrototype> cardStackId,
+        List<CardData> selected,
+        bool playOnUser = false
+    )
+    {
+        if (!Timing.IsFirstTimePredicted)
+            return;
+
+        // Spawns an invisible client side clone to apply the sprite to for the cards which are being transferred
+        var ent = SpawnTempClone(donorFlipped, donorCoords, cardStackId, selected);
+        if (ent == EntityUid.Invalid)
+            return;
+
+        _storage.PlayPickupAnimation(ent, donorCoords, recipientCoords, donorRotation);
+    }
+
+    private EntityUid SpawnTempClone(
+        bool donorFlipped,
+        EntityCoordinates donorCoords,
+        ProtoId<CardStackPrototype> cardStackId,
+        List<CardData> selected
+    )
+    {
+        if (!PrototypeManager.Resolve(cardStackId, out var newStack))
+            return EntityUid.Invalid;
+
+        var ent = Spawn(newStack.Spawn, donorCoords);
+        QueueDel(ent);
+
+        if (
+            !TryComp<CardsComponent>(ent, out var cardsComp)
+            || !TryComp(ent, out SpriteComponent? spriteComp)
+        )
+        {
+            return EntityUid.Invalid;
+        }
+
+        cardsComp.Cards = selected;
+        cardsComp.Flipped = donorFlipped;
+        _sprite.SetDrawDepth((ent, spriteComp), (int)DrawDepth.BelowMobs);
+
+        if (TryComp<AppearanceComponent>(ent, out var appearance))
+        {
+            Appearance.SetData(ent, CardVisuals.CardList, GetCardListVisualState(cardsComp), appearance);
+            Appearance.SetData(ent, CardVisuals.IsFlipped, cardsComp.Flipped, appearance);
+
+            // Appearance only changes on Update
+            // As this clone is deleted shortly after need to update the sprite now
+            var ev = new AppearanceChangeEvent
+            {
+                Component = appearance,
+                AppearanceData = new Dictionary<Enum, object>(),
+                Sprite = spriteComp,
+            };
+            RaiseLocalEvent(ent, ref ev);
+        }
+
+        _sprite.SetVisible((ent, spriteComp), false);
+        return ent;
     }
 }

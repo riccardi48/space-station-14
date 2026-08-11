@@ -101,6 +101,7 @@ public abstract partial class SharedCardSystem : EntitySystem
         if (selected != null && selected.Count != cards.Count)
             return false;
 
+        PlayCardDrawAnimation((donor.Owner, donor.Comp), (recipient.Owner, recipient.Comp), transferred);
         MergeDecks((donor.Owner, donor.Comp), (recipient.Owner, recipient.Comp), cards);
         return true;
     }
@@ -149,11 +150,15 @@ public abstract partial class SharedCardSystem : EntitySystem
             return;
         }
 
-        if (SplitDeck(cards, new EntityCoordinates(user, Vector2.Zero), MovedCards(cards.Comp, amount)) is not { } split)
+        var selected = MovedCards(cards.Comp, amount);
+
+        if (SplitDeck(cards, new EntityCoordinates(user, Vector2.Zero), selected) is not { } split)
             return;
 
         Hands.PickupOrDrop(user, split, animate: false);
         Popup.PopupCursor(Loc.GetString("comp-stack-split"), user);
+        if (TryComp<CardsComponent>(split, out var splitComp))
+            PlayCardAnimation(cards, (split, splitComp), GetCardFromIndex(splitComp.Cards, selected), playOnUser: true);
     }
 
     /// <summary>
@@ -270,6 +275,7 @@ public abstract partial class SharedCardSystem : EntitySystem
             Hands.PickupOrDrop(user.Owner, split.Value);
         }
 
+        PlayCardAnimation(cards, (split.Value, recipientStack), GetCardFromIndex(recipientStack.Cards, new List<int> { cardIndex }), playOnUser: true);
         Popup.PopupCursor(Loc.GetString("comp-stack-split"), user.Owner);
 
         UpdateVisualState(cards);

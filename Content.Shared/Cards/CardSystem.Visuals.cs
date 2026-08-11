@@ -1,3 +1,7 @@
+using System.Linq;
+using Content.Shared.Examine;
+using Robust.Shared.Map;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared.Cards;
@@ -10,6 +14,21 @@ public abstract partial class SharedCardSystem
     {
         UpdateVisualState(ent);
     }
+
+    [SubscribeLocalEvent]
+    private void OnCardsExamined(Entity<CardsComponent> ent, ref ExaminedEvent args)
+    {
+        // Can only see top card if the deck is flipped
+        if (!args.IsInDetailsRange || !ent.Comp.Flipped)
+            return;
+
+        var cards = GetCardListVisualState(ent.Comp);
+        var cardName = (string)cards.CardList.Last().CardId;
+        args.PushMarkup(
+            Loc.GetString("comp-cards-examine-detail", ("card", Loc.GetString(cardName.Replace('_', '-'))))
+        );
+    }
+
 
     /// <summary>
     /// Builds the <see cref="CardListVisualState"/> describing which cards in the stack are currently
@@ -44,6 +63,60 @@ public abstract partial class SharedCardSystem
             Appearance.SetData(ent, CardVisuals.IsFlipped, ent.Comp.Flipped, appearance);
         }
     }
+
+    protected void PlayCardDrawAnimation(
+        Entity<CardsComponent> donor,
+        Entity<CardsComponent> recipient,
+        int delta,
+        bool playOnUser = false
+    )
+    {
+        // Plays animation for a split or merge where the cards taken are from the top or bottom
+        var selected = GetCardFromIndex(donor.Comp.Cards, MovedCards(donor.Comp, delta));
+        PlayCardAnimation(donor, recipient, selected, playOnUser: playOnUser);
+    }
+
+    protected void PlayCardTakeAnimation(
+        Entity<CardsComponent> donor,
+        Entity<CardsComponent> recipient,
+        List<int> cardInx,
+        bool playOnUser = false
+    )
+    {
+        // Plays animation for a split or merge where the cards taken are from somewhere in the deck
+        var selected = GetCardFromIndex(recipient.Comp.Cards, cardInx);
+        PlayCardAnimation(donor, recipient, selected, playOnUser: playOnUser);
+    }
+
+    private void PlayCardAnimation(
+        Entity<CardsComponent> donor,
+        Entity<CardsComponent> recipient,
+        List<CardData> selected,
+        bool playOnUser = false
+    )
+    {
+        var xform = Transform(donor.Owner);
+        PlayCardAnimation(
+            xform.Coordinates,
+            xform.LocalRotation,
+            donor.Comp.Flipped,
+            Transform(recipient).Coordinates,
+            donor.Comp.CardStackType,
+            selected,
+            playOnUser: playOnUser
+        );
+    }
+
+    protected abstract void PlayCardAnimation(
+        EntityCoordinates donorCoords,
+        Angle donorRotation,
+        bool donorFlipped,
+        EntityCoordinates recipientCoords,
+        ProtoId<CardStackPrototype> cardStackId,
+        List<CardData> selected,
+        bool playOnUser = false
+    );
+
 }
 
 /// <summary>

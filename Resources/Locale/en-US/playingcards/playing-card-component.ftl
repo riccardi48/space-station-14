@@ -59,3 +59,5 @@ king-of-spades = king of spades
 
 deck-of-cards = deck of cards
 syndi-deck-of-cards = syndicate deck of cards
+
+comp-cards-examine-detail = The top card is the {$card}

@@ -2,6 +2,8 @@ using Content.Shared.Cards;
 using Content.Shared.Throwing;
 using JetBrains.Annotations;
 using Robust.Shared.Map;
+using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server.Cards;
 
@@ -22,6 +24,19 @@ public sealed partial class CardSystem : SharedCardSystem
             args.ItemUid = split;
 
         args.Handled = true;
+    }
+
+    [SubscribeNetworkEvent]
+    private void HandleDropMerge(CardDropMergeEvent args)
+    {
+        var donor = GetEntity(args.Donor);
+        var recipient = GetEntity(args.Recipient);
+
+        if (
+            TryComp<CardsComponent>(donor, out var donorComp)
+            && TryComp<CardsComponent>(recipient, out var recipientComp)
+        )
+            TryMergeDecks((donor, donorComp), (recipient, recipientComp), out _);
     }
 
     protected override void OnCardsInit(Entity<CardsComponent> ent, ref ComponentInit args)
@@ -66,5 +81,31 @@ public sealed partial class CardSystem : SharedCardSystem
         Dirty(split, splitComp);
 
         return split;
+    }
+
+    protected override void PlayCardAnimation(
+        EntityCoordinates donorCoords,
+        Angle donorRotation,
+        bool donorFlipped,
+        EntityCoordinates recipientCoords,
+        ProtoId<CardStackPrototype> cardStackId,
+        List<CardData> selected,
+        bool playOnUser = false
+    )
+    {
+        var ev = new CardAnimationEvent(
+            GetNetCoordinates(donorCoords),
+            donorRotation,
+            donorFlipped,
+            GetNetCoordinates(recipientCoords),
+            cardStackId,
+            selected
+        );
+        // Don't for the client which is running it as they can have their own predicted animation
+        // Do play it for systems which are not predicted i.e. splitting stacks
+        var filter = Filter
+            .Pvs(recipientCoords)
+            .RemoveWhereAttachedEntity(e => !playOnUser && (e == recipientCoords.EntityId || e == donorCoords.EntityId));
+        RaiseNetworkEvent(ev, filter);
     }
 }
