@@ -579,7 +579,7 @@ public sealed partial class CargoSystem
         // Spawn container and insert the item into it if a container is defined.
         if (product.Container is { } productContainer)
         {
-            var containerEntity = Spawn(productContainer.Entity, itemXForm.Coordinates);
+            var containerEntity = SpawnAttachedTo(productContainer.Entity, itemXForm.Coordinates);
             _transformSystem.SetLocalRotation(containerEntity, itemXForm.LocalRotation);
 
             if (
@@ -599,7 +599,7 @@ public sealed partial class CargoSystem
         }
 
         // Create a sheet of paper to write the order details on
-        var printed = Spawn(paperProto, spawn);
+        var printed = SpawnAttachedTo(paperProto, spawn);
         if (TryComp<PaperComponent>(printed, out var paper))
         {
             // fill in the order data
