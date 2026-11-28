@@ -288,7 +288,7 @@ public sealed partial class ServerNavMapSystem : NavMapSystem
 
     #region: Beacon functions
 
-    private void UpdateNavMapBeaconData(EntityUid uid, NavMapBeaconComponent component, TransformComponent? xform = null)
+    protected override void UpdateNavMapBeaconData(EntityUid uid, NavMapBeaconComponent component, TransformComponent? xform = null)
     {
         if (!Resolve(uid, ref xform))
             return;

@@ -105,6 +105,7 @@ public abstract partial class NavMapSystem : EntitySystem
 
         ent.Comp.Enabled = enabled;
         Dirty(ent);
+        UpdateNavMapBeaconData(ent.Owner, ent.Comp);
         UpdateBeaconEnabledVisuals((ent.Owner, ent.Comp));
 
     }
@@ -334,6 +335,10 @@ public abstract partial class NavMapSystem : EntitySystem
     }
 
     #endregion
+
+    protected virtual void UpdateNavMapBeaconData(EntityUid uid, NavMapBeaconComponent component, TransformComponent? xform = null)
+    {
+    }
 
     #region: System messages
 
