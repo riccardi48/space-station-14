@@ -39,6 +39,7 @@
     - state: biodegrade
   - type: ActionRequirements
     failPopup: changeling-not-enough-chemicals
+    failPopupType: SmallCaution
     requirements:
       Performer:
       - condition: !type:SatiationCondition
@@ -211,6 +212,7 @@
     event: !type:EntityEffectActionEvent
   - type: ActionRequirements
     failPopup: changeling-not-enough-chemicals
+    failPopupType: SmallCaution
     requirements:
       Performer:
       - condition: !type:SatiationCondition
