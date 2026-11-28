@@ -38,13 +38,12 @@
     layers:
     - state: biodegrade
   - type: ActionRequirements
-    failPopupType: SmallCaution
+    failPopup: changeling-not-enough-chemicals
     requirements:
       Performer:
       - condition: !type:SatiationCondition
           satiationType: Chemicals
           min: 20
-        failPopup: changeling-not-enough-chemicals
     effects:
       Performer:
       - !type:Satiate
@@ -71,9 +70,10 @@
       map: ["enum.ActionVisuals.IconToggled"]
       visible: false
   - type: ActionRequirements
-    conditions:
+    failPopup: changeling-devour-attempt-failed-covered-mouth
+    requirements:
       Performer:
-      - !type:MouthUncoveredCondition
+      - condition: !type:MouthUncoveredCondition
   - type: TargetAction
   - type: EntityTargetAction
     event: !type:ChangelingDevourActionEvent
@@ -176,11 +176,12 @@
       map: ["enum.ActionVisuals.IconToggled"]
       visible: false
   - type: ActionRequirements
-    conditions:
+    failPopup: changeling-not-enough-chemicals
+    requirements:
       Performer:
-      - !type:SatiationCondition
-        satiationType: Chemicals
-        min: 50
+      - condition: !type:SatiationCondition
+          satiationType: Chemicals
+          min: 50
     effects:
       Performer:
       - !type:Satiate
@@ -211,7 +212,6 @@
     event: !type:EntityEffectActionEvent
   - type: ActionRequirements
     failPopup: changeling-not-enough-chemicals
-    failPopupType: SmallCaution
     requirements:
       Performer:
       - condition: !type:SatiationCondition

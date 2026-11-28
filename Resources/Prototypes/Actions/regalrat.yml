@@ -12,12 +12,12 @@
     useDelay: 4
   - type: ActionRequirements
     failPopup: rat-king-too-hungry
-    conditions:
+    requirements:
       Performer:
-      - !type:SatiationCondition
-        satiationType: Hunger
-        min: 25
-        minInclusive: true
+      - condition: !type:SatiationCondition
+          satiationType: Hunger
+          min: 25
+          minInclusive: true
     effects:
       Performer:
       - !type:Satiate
@@ -40,12 +40,12 @@
     useDelay: 6
   - type: ActionRequirements
     failPopup: rat-king-too-hungry
-    conditions:
+    requirements:
       Performer:
-      - !type:SatiationCondition
-        satiationType: Hunger
-        min: 50
-        minInclusive: true
+      - condition: !type:SatiationCondition
+          satiationType: Hunger
+          min: 50
+          minInclusive: true
     effects:
       Performer:
       - !type:Satiate
