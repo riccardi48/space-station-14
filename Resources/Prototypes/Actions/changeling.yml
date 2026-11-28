@@ -70,7 +70,6 @@
       map: ["enum.ActionVisuals.IconToggled"]
       visible: false
   - type: ActionRequirements
-    failPopup: changeling-devour-attempt-failed-covered-mouth
     requirements:
       Performer:
       - condition: !type:MouthUncoveredCondition

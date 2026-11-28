@@ -3,7 +3,6 @@ roles-antag-changeling-name = Changeling
 roles-antag-changeling-objective = Use shapeshifting and mutations to hide among the crew and devour them unnoticed.
 
 # devour
-changeling-devour-attempt-failed-covered-mouth = Our mouth is too covered to devour this!
 changeling-devour-attempt-failed-cannot-devour = We cannot devour this!
 changeling-devour-attempt-failed-already-devoured = We already consumed this body!
 changeling-devour-attempt-failed-devoured-recently = This body is too mangled to devour!
