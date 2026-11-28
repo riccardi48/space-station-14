@@ -32,7 +32,7 @@ public sealed partial class ActionRequirementsComponent : Component
     /// Gets "Performer", "Target" and "Action" passed into it as identities.
     /// </summary>
     [DataField]
-    public LocId? FailPopup = null;
+    public LocId? FailPopup;
 
     /// <summary>
     /// The type the popup for the performer should be.
