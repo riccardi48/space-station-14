@@ -105,9 +105,8 @@ public abstract partial class NavMapSystem : EntitySystem
 
         ent.Comp.Enabled = enabled;
         Dirty(ent);
-        UpdateNavMapBeaconData(ent.Owner, ent.Comp);
         UpdateBeaconEnabledVisuals((ent.Owner, ent.Comp));
-
+        UpdateNavMapBeaconData(ent.Owner, ent.Comp);
     }
 
     /// <summary>
