@@ -30,12 +30,14 @@ public sealed partial class ActionRequirementsComponent : Component
     /// <summary>
     /// The text to show to the performer about why their action failed.
     /// Gets "Performer", "Target" and "Action" passed into it as identities.
+    /// This will be overridden by <see cref="ActionRequirementCondition.FailPopup"/>.
     /// </summary>
     [DataField]
     public LocId? FailPopup;
 
     /// <summary>
     /// The type the popup for the performer should be.
+    /// This will be overridden by <see cref="ActionRequirementCondition.FailPopupType"/>.
     /// </summary>
     [DataField]
     public PopupType FailPopupType = PopupType.Small;
