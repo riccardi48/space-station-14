@@ -21,13 +21,6 @@ public sealed partial class ActionRequirementsComponent : Component
     public Dictionary<ActionRequirementTarget, ActionRequirementCondition[]> Requirements = new();
 
     /// <summary>
-    /// What entity conditions the related entities need to meet for the action to count as valid.
-    /// Can be used, for example, to check if the performer has enough satiation.
-    /// </summary>
-    [DataField, Obsolete("Use the Requirements field instead, the indentation is different")]
-    public Dictionary<ActionRequirementTarget, EntityCondition[]> Conditions = new();
-
-    /// <summary>
     /// Effects to use on the related entities AFTER the action is successfully performed.
     /// Can be used, for example, to spend satiation after the action is performed.
     /// </summary>

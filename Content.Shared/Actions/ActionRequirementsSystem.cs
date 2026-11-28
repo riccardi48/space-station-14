@@ -69,25 +69,20 @@ public sealed partial class ActionRequirementsSystem : EntitySystem
 
     private ActionRequirementCondition[] GetConditions(Entity<ActionRequirementsComponent> ent, ActionRequirementTarget target)
     {
-        var conditions = ent.Comp.Conditions
-            .Where(x => x.Key.HasFlag(target))
-            .SelectMany(x => x.Value)
-            .Select(x => new ActionRequirementCondition { Condition = x });
-
         var requirements = ent.Comp.Requirements
             .Where(x => x.Key.HasFlag(target))
             .SelectMany(x => x.Value);
 
-        return conditions.Concat(requirements).ToArray();
+        return requirements.ToArray();
     }
 
     private EntityEffect[] GetEffects(Entity<ActionRequirementsComponent> ent, ActionRequirementTarget target)
     {
-        var conditions = ent.Comp.Effects
+        var effects = ent.Comp.Effects
             .Where(x => x.Key.HasFlag(target))
             .SelectMany(x => x.Value);
 
-        return conditions.ToArray();
+        return effects.ToArray();
     }
 
     private void DoCancel(Entity<ActionRequirementsComponent> ent, EntityUid target, EntityUid user, ref ActionAttemptEvent args, LocId? failPopup = null, PopupType? failPopupType = null)
