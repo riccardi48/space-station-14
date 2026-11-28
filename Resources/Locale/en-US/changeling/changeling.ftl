@@ -64,7 +64,7 @@ changeling-fake-mindshield-disabled = We stop emitting fake mindshield waves.
 # chemicals
 changeling-not-enough-chemicals = We don't have enough Chemicals.
 
-#fleshtomb
+# fleshtomb
 changeling-fleshtomb-not-dead = We can only entomb a corpse.
 
 # other
