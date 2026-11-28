@@ -520,7 +520,7 @@
       Target:
       - condition: !type:MobStateCondition
           mobstate: Dead
-        failPopup: changeling-action-fail-generic
+        failPopup: changeling-fleshtomb-not-dead
     effects:
       Performer:
       - !type:Satiate
